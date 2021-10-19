@@ -58,7 +58,8 @@ long int UpTime(int pid);
 const std::string PidsRegex {"^/proc/([0-9]+)$"};
 const std::string CpuModelRegex {"^model name[\\s]+:\\s(.+)"};
 const std::string UtilizationRegex {"^cpu\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)"};
-
+const std::string OsRegex {"^PRETTY_NAME=\\\"(.*)\\\""};
+const std::string KernelRegex {"^Linux version ([0-9a-zA-Z\\.-]+)"};
 
 // Helper functions
 /**
