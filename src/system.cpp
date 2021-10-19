@@ -20,10 +20,6 @@ System::System()
 
 // TODO: Return the system's CPU
 Processor& System::Cpu() { 
-    
-    cpu_.Utilization();
-    cpu_.Model();
-
     return cpu_; 
 }
 

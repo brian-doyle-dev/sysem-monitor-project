@@ -20,6 +20,11 @@ float Processor::Utilization() {
   int total = diff.Total();
   int minus_idle = diff.Total() - diff.idle;
 
+  if (total == 0)
+  {
+    return 0.0;
+  }
+  
   float utilization = (float(minus_idle))/(float(total)) * 100.0;
   //float utilization = (float(cpuTime.Total() - cpuTime.idle) / float(cpuTime.Total())) * 100.0; 
 
@@ -30,7 +35,7 @@ float Processor::Utilization() {
    
   }
 
-  assert(utilization > 0.0);
+  assert(utilization >= 0.0);
   assert(utilization <= 100.0);
    
   return utilization; 
