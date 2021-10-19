@@ -3,6 +3,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <cassert>
 
 #include "format.h"
 #include "ncurses_display.h"
@@ -16,8 +17,11 @@ using std::to_string;
 std::string NCursesDisplay::ProgressBar(float percent) {
   std::string result{"0%"};
   int size{50};
-  float bars{percent * size};
+  float bars{percent / 2};
 
+  assert(percent >= 0.0);
+  assert(percent <= 100.0);
+  
   for (int i{0}; i < size; ++i) {
     result += i <= bars ? '|' : ' ';
   }
