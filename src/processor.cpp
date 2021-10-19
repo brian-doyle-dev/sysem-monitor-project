@@ -8,8 +8,19 @@ Processor::Processor()
   Model();
 }
 
-// TODO: Return the aggregate CPU utilization
+/**
+ * @brief Return the CPU utilization
+ * @return The CPU utilization
+ */
 float Processor::Utilization() {
+  return utilization;
+}
+
+/**
+ * @brief Read the CPU time data from the system and update the utilization
+ * @return (void)
+ */
+void Processor::UpdateUtilization() {
   SysMon::CpuTime cpuTime;
   cpuTime = LinuxParser::Attribute<SysMon::CpuTime>(std::string(LinuxParser::UtilizationRegex), 
                                               LinuxParser::kProcDirectory + LinuxParser::kStatFilename);
@@ -17,30 +28,20 @@ float Processor::Utilization() {
   SysMon::CpuTime diff = cpuTime - this->cpuTime;
   this->cpuTime = cpuTime;
 
-  int total = diff.Total();
-  int minus_idle = diff.Total() - diff.idle;
-
-  if (total == 0)
+  try
   {
-    return 0.0;
+     utilization = (float(diff.Total() - diff.idle))/(float(diff.Total())) * 100.0;
   }
-  
-  float utilization = (float(minus_idle))/(float(total)) * 100.0;
-  //float utilization = (float(cpuTime.Total() - cpuTime.idle) / float(cpuTime.Total())) * 100.0; 
-
-  if (utilization <= 0.0)
+  catch(const std::exception& e)
   {
-   assert(utilization >= 0.0);
-   assert(utilization <= 100.0);
-   
+    // Do nothing
   }
-
-  assert(utilization >= 0.0);
-  assert(utilization <= 100.0);
-   
-  return utilization; 
 }
 
+/**
+ * @brief Read the processor model from the system
+ * @return (void)
+ */
 void Processor::Model() {
   model = LinuxParser::Attribute<std::string>(std::string(LinuxParser::CpuModelRegex), 
                                               LinuxParser::kProcDirectory + LinuxParser::kCpuinfoFilename);

@@ -3,6 +3,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <thread>
 
 #include "process.h"
 #include "processor.h"
@@ -13,12 +14,11 @@ using std::size_t;
 using std::string;
 using std::vector;
 
-System::System()
-{
 
-}
-
-// TODO: Return the system's CPU
+/**
+ * @brief Return the CPU info
+ * @return The CPU info
+ */
 Processor& System::Cpu() { 
     return cpu_; 
 }

@@ -8,12 +8,13 @@ class Processor {
   Processor();
 
   float Utilization();  
+  void UpdateUtilization();
   void Model();
 
-  // TODO: Declare any necessary private members
  private:
     SysMon::CpuTime cpuTime {0, 0, 0, 0, 0, 0, 0}; 
-    std::string model;
+    std::string model = "";
+    float utilization = 0;
 };
 
 #endif
