@@ -60,6 +60,10 @@ const std::string CpuModelRegex {"^model name[\\s]+:\\s(.+)"};
 const std::string UtilizationRegex {"^cpu\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)"};
 const std::string OsRegex {"^PRETTY_NAME=\\\"(.*)\\\""};
 const std::string KernelRegex {"^Linux version ([0-9a-zA-Z\\.-]+)"};
+const std::string MemTotalRegex {"^MemTotal:\\s+([0-9]+)"};
+const std::string MemFreeRegex {"^MemFree:\\s+([0-9]+)"};
+const std::string MemAvailableRegex {"^MemAvailable:\\s+([0-9]+)"};
+const std::string UptimeRegex {"^([0-9]+)"};
 
 // Helper functions
 /**
@@ -69,6 +73,7 @@ const std::string KernelRegex {"^Linux version ([0-9a-zA-Z\\.-]+)"};
  */
 void ConvertData(std::smatch match, std::string& result);
 void ConvertData(std::smatch match, int& result);
+void ConvertData(std::smatch match, long& result);
 void ConvertData(std::smatch match, SysMon::CpuTime& result);
 
 //template <typename T> T Attribute(const std::string& regexString, std::string path);

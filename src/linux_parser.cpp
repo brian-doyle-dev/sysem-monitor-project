@@ -71,6 +71,18 @@ void LinuxParser::ConvertData(std::smatch match, int& result)
 }
 
 /**
+ * @brief Convert the data found by Attribute to the required type <int>
+ * 
+ * @param data The input string 
+ * @param result The converted data
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, long& result)
+{
+    result = stol(match[1].str());
+}
+
+/**
  * @brief Convert the data found by Attribute to the required type <SysMon::CpuTime>
  * 
  * @param data The input string 
