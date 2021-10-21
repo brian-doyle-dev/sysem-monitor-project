@@ -9,15 +9,20 @@
 
 class System {
  public:
-  Processor& Cpu();                   
-  std::vector<Process>& Processes();  // TODO: See src/system.cpp
+  System();
+  Processor& Cpu();
+
+  void UpdateProcesses();
+  std::vector<Process>& Processes();
+  void AddNewProcess(int pid);
+  void RemoveTerminatedProcesses();
 
   void UpdateMemoryUtilization();     
   float MemoryUtilization();          
 
   void UpdateUpTime();
   long UpTime();  
-                      
+
   int TotalProcesses();               // TODO: See src/system.cpp
   int RunningProcesses();             // TODO: See src/system.cpp
   std::string Kernel();               // TODO: See src/system.cpp

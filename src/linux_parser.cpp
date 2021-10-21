@@ -12,19 +12,6 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-// DONE: An example of how to read data from the filesystem
-string LinuxParser::Kernel() {
-  string os, version, kernel;
-  string line;
-  std::ifstream stream(kProcDirectory + kVersionFilename);
-  if (stream.is_open()) {
-    std::getline(stream, line);
-    std::istringstream linestream(line);
-    linestream >> os >> version >> kernel;
-  }
-  return kernel;
-}
-
 // DONE: Updated this to use std::filesystem and std::regex
 vector<int> LinuxParser::Pids() {
   vector<int> pids;
@@ -44,7 +31,6 @@ vector<int> LinuxParser::Pids() {
 
   return pids;
 }
-
 
 /**
  * @brief Convert the data found by Attribute to the required type <std::string>
@@ -100,41 +86,6 @@ void LinuxParser::ConvertData(std::smatch match, SysMon::CpuTime& result)
   result.softirq = stoi(match[7].str());
 }
 
-#if 0
-/**
- * @brief Get an attribute from the Linux system
- * 
- * @param regex Description of the search parameter
- * @param path The file path for the required attribute
- * @param result The value returned by the search
- * @return The value returned by the search
- */
-template <typename T> T Attribute(const std::string& regexString, std::string path) {
-  T data;
-
-  std::string line;
-  std::string key;
-  std::string value;
-  std::ifstream filestream(path);
-  std::smatch match;
-  std::regex regex(regexString);
-
-  if (filestream.is_open()) 
-  {
-    while (std::getline(filestream, line)) 
-    {
-      if (std::regex_search(line, match, regex))
-      {
-        ConvertData(match[1].str(), data);
-        break;
-       }
-    }
-  }
-
-  return data;
-}
-
-#endif
 
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { return 0.0; }

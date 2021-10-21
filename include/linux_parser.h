@@ -103,7 +103,7 @@ template <typename T> T Attribute(const std::string& regexString, std::string pa
       {
         ConvertData(match, data);
         break;
-       }
+      }
     }
   }
 

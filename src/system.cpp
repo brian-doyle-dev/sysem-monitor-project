@@ -15,6 +15,10 @@ using std::size_t;
 using std::string;
 using std::vector;
 
+System::System()
+{
+  System::UpdateProcesses();
+}
 
 /**
  * @brief Return the CPU info
@@ -24,17 +28,61 @@ Processor& System::Cpu() {
   return cpu_; 
 }
 
+void System::AddNewProcess(int pid)
+{
+  Process newProcess {pid};
+  processes_.push_back(newProcess);
+}
+
+void System::RemoveTerminatedProcesses()
+{
+
+}
+
+void System::UpdateProcesses()
+{
+  std::vector<int> pids = LinuxParser::Pids();
+
+  for(auto pid : pids)
+  {
+    if (processes_.size() == 0)
+    {
+      AddNewProcess(pid);
+    }
+    else
+    {
+      bool duplicate = false;
+      for(auto process : processes_)
+      {
+        if (process.Pid() == pid)
+        {
+          duplicate = true;
+        }
+      }
+
+      if (!duplicate)
+      {
+        AddNewProcess(pid);
+      }
+    }
+  }
+
+//  sort(processes_.begin(), processes_.end(), Process::Compare);
+  sort(processes_.begin(), processes_.end());
+}
+
 // TODO: Return a container composed of the system's processes
-vector<Process>& System::Processes() { return processes_; }
+vector<Process>& System::Processes() {
+  return processes_;
+}
 
 /**
  * @brief Return kernel version 
  * @return The kernel version
  */
 std::string System::Kernel() { 
-   return LinuxParser::Attribute<std::string>(std::string(LinuxParser::KernelRegex), 
-                                              LinuxParser::kProcDirectory + LinuxParser::kVersionFilename);
- }
+  return LinuxParser::Attribute<std::string>(LinuxParser::KernelRegex, LinuxParser::kProcDirectory + LinuxParser::kVersionFilename);
+}
 
 /**
  * @brief Update the memory utilization by reading the system files.
@@ -60,16 +108,21 @@ float System::MemoryUtilization() {
  * @return The operating system name
  */
 std::string System::OperatingSystem() { 
-  return LinuxParser::Attribute<std::string>(std::string(LinuxParser::OsRegex), 
-                                              LinuxParser::kOSPath);
+  return LinuxParser::Attribute<std::string>(LinuxParser::OsRegex, LinuxParser::kOSPath);
 
 }
 
 // TODO: Return the number of processes actively running on the system
-int System::RunningProcesses() { return 0; }
+int System::RunningProcesses() {
+
+  return 0;
+
+}
 
 // TODO: Return the total number of processes on the system
-int System::TotalProcesses() { return 0; }
+int System::TotalProcesses() {
+  return processes_.size();
+}
 
 /**
  * @brief Update the system uptime by reading the system file
