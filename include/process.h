@@ -16,7 +16,6 @@ class Process {
   
   void UpdateProcess();
   
-
   static bool Compare(Process process1, Process process2);
 
   int Pid();                               // TODO: See src/process.cpp
@@ -34,6 +33,12 @@ class Process {
   SortColumn sortColumn = PID;
 
   int pid;
+  float utilization;
+  std::string user;
+  std::string ram;
+  std::string command;
+  long int uptime;
+
 };
 
 #endif

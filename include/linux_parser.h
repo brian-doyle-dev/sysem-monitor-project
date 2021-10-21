@@ -64,7 +64,7 @@ const std::string MemTotalRegex {"^MemTotal:\\s+([0-9]+)"};
 const std::string MemFreeRegex {"^MemFree:\\s+([0-9]+)"};
 const std::string MemAvailableRegex {"^MemAvailable:\\s+([0-9]+)"};
 const std::string UptimeRegex {"^([0-9]+)"};
-
+const std::string CommandRegex {"^([a-zA-Z0-9\\-\\s/]+)"};
 // Helper functions
 /**
  * @brief CPU times from the /proc/stat file for calculating the utilization

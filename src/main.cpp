@@ -6,7 +6,7 @@
 int main() {
   System system;
 
-  std::thread displayThread(NCursesDisplay::Display, std::ref(system), 10);
+  std::thread displayThread(NCursesDisplay::Display, std::ref(system), 50);
   std::thread updateThread(Update::Start, std::ref(system));
   
   displayThread.join();

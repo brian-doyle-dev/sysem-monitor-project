@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <iostream>
 
 #include "process.h"
 #include "processor.h"
@@ -67,6 +68,12 @@ void System::UpdateProcesses()
     }
   }
 
+  for (auto& process : processes_)
+  {
+    process.UpdateProcess();
+
+    //std::cout << process.Command();
+  }
 //  sort(processes_.begin(), processes_.end(), Process::Compare);
   sort(processes_.begin(), processes_.end());
 }

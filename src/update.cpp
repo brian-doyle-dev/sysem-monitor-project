@@ -10,6 +10,7 @@ void Update::Start(System& system)
         system.Cpu().UpdateUtilization();
         system.UpdateMemoryUtilization();
         system.UpdateUpTime();
+        system.UpdateProcesses();
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
