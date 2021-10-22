@@ -30,6 +30,16 @@ struct CpuTime {
     }
 };
 
+struct CpuUtilization {
+    int utime;
+    int stime;
+    int cutime;
+    int cstime;
+    int starttime;
+    int utilization;
+
+    float total;
+};
 }
 
 #endif

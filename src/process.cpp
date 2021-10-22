@@ -13,16 +13,58 @@ using std::vector;
 
 bool Process::ascending = false;
 
-void Process::UpdateProcess() {
-  std::string path = LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kCmdlineFilename;
-  command = LinuxParser::Attribute<std::string>(LinuxParser::CommandRegex, path);
+
+float Process::UpdateCpuUtilization()
+{
+  std::string path = LinuxParser::ProcPath(LinuxParser::kStatFilename);
+  SysMon::CpuTime cpuTime = LinuxParser::Attribute<SysMon::CpuTime>(LinuxParser::UtilizationRegex, path);
+
+  path = LinuxParser::ProcPath(pid, LinuxParser::kStatFilename);
+  SysMon::CpuUtilization processTime = LinuxParser::Attribute<SysMon::CpuUtilization>(LinuxParser::StatRegex, path);
+
+  float total = (cpuTime.Total() - processTime.total);
+  float diff = ((processTime.utime + processTime.stime) - (this->processTime.utime - this->processTime.stime));
+//  utilization = 100 * ((processTime.utime + processTime.stime) - (this->processTime.utime - this->processTime.stime)) / (cpuTime.Total() - processTime.total);
+  float utilization = 100 * (diff) / (total);
+
+  processTime.total = cpuTime.Total();
+  this->processTime = processTime;
+
+  return utilization;
 }
 
-// TODO: Return this process's ID
-int Process::Pid() { return pid; }
+/**
+ * @brief Update the process
+ * 
+ * Read the relevant information from the file system
+ * 
+ * Note: Used the following for CPU utilization
+ *  https://man7.org/linux/man-pages/man5/proc.5.html
+ *
+ * @return (void)
+ */
+void Process::UpdateProcess() {
+  std::string path = LinuxParser::ProcPath(pid, LinuxParser::kCmdlineFilename);
+  command = LinuxParser::Attribute<std::string>(LinuxParser::CommandRegex, path);
+  utilization = UpdateCpuUtilization();
+}
 
-// TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return 0; }
+/**
+ * @brief Return process id 
+ * @return The process id
+ */
+int Process::Pid() { 
+  return pid; 
+}
+
+
+/**
+ * @brief Return CPU utilization for process
+ * @return The CPU utilization for process
+ */
+float Process::CpuUtilization() { 
+  return utilization; 
+}
 
 string Process::Command() { 
   return command; 

@@ -65,16 +65,18 @@ const std::string MemFreeRegex {"^MemFree:\\s+([0-9]+)"};
 const std::string MemAvailableRegex {"^MemAvailable:\\s+([0-9]+)"};
 const std::string UptimeRegex {"^([0-9]+)"};
 const std::string CommandRegex {"^([a-zA-Z0-9\\-\\s/]+)"};
+const std::string StatRegex("^([0-9]+)\\s(\\([a-zA-Z_\\-0-9]+\\)) ([IRSDZTtWXxKWP]) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9\\-]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9\\-]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)");
+
+
+
 // Helper functions
-/**
- * @brief CPU times from the /proc/stat file for calculating the utilization
- * @author 
- * @since Mon Oct 18 2021
- */
+std::string ProcPath(std::string file);
+std::string ProcPath(int pid, std::string file);
 void ConvertData(std::smatch match, std::string& result);
 void ConvertData(std::smatch match, int& result);
 void ConvertData(std::smatch match, long& result);
 void ConvertData(std::smatch match, SysMon::CpuTime& result);
+void ConvertData(std::smatch match, SysMon::CpuUtilization& result);
 
 //template <typename T> T Attribute(const std::string& regexString, std::string path);
 /**

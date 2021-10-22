@@ -2,7 +2,7 @@
 #define PROCESS_H
 
 #include <string>
-
+#include "monitor_types.h"
 
 /*
 Basic class for Process representation
@@ -14,8 +14,9 @@ class Process {
       Process::ascending = false;
   }
   
+  float UpdateCpuUtilization();
   void UpdateProcess();
-  
+
   static bool Compare(Process process1, Process process2);
 
   int Pid();                               // TODO: See src/process.cpp
@@ -38,6 +39,8 @@ class Process {
   std::string ram;
   std::string command;
   long int uptime;
+
+  SysMon::CpuUtilization processTime = {0, 0, 0, 0, 0, 0, 0.0};
 
 };
 

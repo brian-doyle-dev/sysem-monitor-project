@@ -32,6 +32,33 @@ vector<int> LinuxParser::Pids() {
   return pids;
 }
 
+
+/**
+ * @brief Calculate the path for the file
+ * @param pid
+ * @param file
+ * @return path
+ */
+std::string LinuxParser::ProcPath(std::string file)
+{
+  std::string path = LinuxParser::kProcDirectory + file;
+  return path;
+}
+
+
+/**
+ * @brief Calculate the path for the file and PID
+ * @param pid
+ * @param file
+ * @return path
+ */
+std::string LinuxParser::ProcPath(int pid, std::string file)
+{
+  std::string path = LinuxParser::kProcDirectory + std::to_string(pid) + file;
+  return path;
+}
+
+
 /**
  * @brief Convert the data found by Attribute to the required type <std::string>
  * 
@@ -84,6 +111,21 @@ void LinuxParser::ConvertData(std::smatch match, SysMon::CpuTime& result)
   result.iowait = stoi(match[5].str());
   result.irq = stoi(match[6].str());
   result.softirq = stoi(match[7].str());
+}
+
+/**
+ * @brief Convert the data found by Attribute to the required type <SysMon::CpuUtilization>
+ * @param match
+ * @param result
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, SysMon::CpuUtilization& result)
+{
+    result.utime = stoi(match[14].str());
+    result.stime = stoi(match[15].str());
+    result.cutime = stoi(match[16].str());
+    result.cstime = stoi(match[17].str());
+    result.starttime = stoi(match[22].str());
 }
 
 
