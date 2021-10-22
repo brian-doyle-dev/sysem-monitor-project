@@ -5,6 +5,7 @@
 #include <vector>
 #include <thread>
 #include <iostream>
+#include <filesystem>
 
 #include "process.h"
 #include "processor.h"
@@ -35,9 +36,15 @@ void System::AddNewProcess(int pid)
   processes_.push_back(newProcess);
 }
 
-void System::RemoveTerminatedProcesses()
+bool System::ProcessExists(Process& process)
 {
+  if(std::filesystem::exists(LinuxParser::ProcPath(process.Pid())))
+  {
+    return true;
+  }
 
+  std::remove(processes_.begin(), processes_.end(), process);
+  return false;
 }
 
 void System::UpdateProcesses()
@@ -70,7 +77,10 @@ void System::UpdateProcesses()
 
   for (auto& process : processes_)
   {
-    process.UpdateProcess();
+    if(ProcessExists(process))
+    {
+      process.UpdateProcess();
+    }
 
     //std::cout << process.Command();
   }

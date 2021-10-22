@@ -66,10 +66,12 @@ const std::regex MemAvailableRegex {"^MemAvailable:\\s+([0-9]+)"};
 const std::regex UptimeRegex {"^([0-9]+)"};
 const std::regex CommandRegex {"^([a-zA-Z0-9\\-\\s/]+)"};
 const std::regex StatRegex("^([0-9]+)\\s(\\([a-zA-Z_\\-0-9]+\\)) ([IRSDZTtWXxKWP]) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9\\-]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9\\-]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)");
+const std::regex RamStatRegex("^[0-9]+\\s\\([a-zA-Z_\\-0-9]+\\) [IRSDZTtWXxKWP] [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9\\-]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9\\-]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ ([0-9]+)");
 
 
 
 // Helper functions
+std::string ProcPath(int pid);
 std::string ProcPath(std::string file);
 std::string ProcPath(int pid, std::string file);
 void ConvertData(std::smatch match, std::string& result);
@@ -77,6 +79,7 @@ void ConvertData(std::smatch match, int& result);
 void ConvertData(std::smatch match, long& result);
 void ConvertData(std::smatch match, SysMon::CpuTime& result);
 void ConvertData(std::smatch match, SysMon::CpuUtilization& result);
+void ConvertData(std::smatch match, SysMon::Ram& result);
 
 //template <typename T> T Attribute(const std::string& regexString, std::string path);
 /**
@@ -106,6 +109,10 @@ template <typename T> T Attribute(const std::regex& regex, std::string path) {
         break;
       }
     }
+  }
+  else
+  {
+    throw std::runtime_error("File not open: " + path);
   }
 
   return data;

@@ -15,7 +15,7 @@ class System {
   void UpdateProcesses();
   std::vector<Process>& Processes();
   void AddNewProcess(int pid);
-  void RemoveTerminatedProcesses();
+  bool ProcessExists(Process& process);
 
   void UpdateMemoryUtilization();     
   float MemoryUtilization();          

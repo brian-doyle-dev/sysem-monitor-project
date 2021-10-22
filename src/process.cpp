@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "process.h"
 #include "linux_parser.h"
@@ -14,6 +15,15 @@ using std::vector;
 bool Process::ascending = false;
 
 
+/**
+ * @brief Get the CPU utilization for the process
+ * 
+ * Note: Used the following for CPU utilization
+ *  https://man7.org/linux/man-pages/man5/proc.5.html
+ *
+ * 
+ * @return 
+ */
 float Process::UpdateCpuUtilization()
 {
   std::string path = LinuxParser::ProcPath(LinuxParser::kStatFilename);
@@ -33,20 +43,35 @@ float Process::UpdateCpuUtilization()
   return utilization;
 }
 
+std::string Process::UpdateRam()
+{
+  std::string ramString;
+
+  try {
+    std::string path = LinuxParser::ProcPath(pid, LinuxParser::kStatFilename);
+    int ram = LinuxParser::Attribute<SysMon::Ram>(LinuxParser::RamStatRegex, path).rss;
+    ramString = std::to_string(ram);
+  }
+  catch (std::runtime_error& e) {
+    ramString = this->ram; 
+  }
+
+  return ramString;
+}
+
 /**
  * @brief Update the process
  * 
  * Read the relevant information from the file system
  * 
- * Note: Used the following for CPU utilization
- *  https://man7.org/linux/man-pages/man5/proc.5.html
- *
  * @return (void)
  */
 void Process::UpdateProcess() {
+
   std::string path = LinuxParser::ProcPath(pid, LinuxParser::kCmdlineFilename);
   command = LinuxParser::Attribute<std::string>(LinuxParser::CommandRegex, path);
   utilization = UpdateCpuUtilization();
+  ram = UpdateRam();
 }
 
 /**
@@ -66,18 +91,31 @@ float Process::CpuUtilization() {
   return utilization; 
 }
 
+/**
+ * @brief Return the command used to start the process
+ * @return The command used to start the process
+ */
 string Process::Command() { 
   return command; 
 }
 
-// TODO: Return this process's memory utilization
-string Process::Ram() { return string(); }
+/**
+ * @brief Return this process's memory utilization
+ * @return This process's memory utilization
+ */
+string Process::Ram() { 
+  return ram; 
+}
 
 // TODO: Return the user (name) that generated this process
-string Process::User() { return string(); }
+string Process::User() { 
+  return string(); 
+}
 
 // TODO: Return the age of this process (in seconds)
-long int Process::UpTime() { return 0; }
+long int Process::UpTime() { 
+  return 0; 
+}
 
 /**
  * @brief Compare function for sorting processes
@@ -103,6 +141,15 @@ bool Process::operator<(Process const& process) const {
   }
 
   return result;
+}
+
+bool Process::operator==(Process const& process) const {
+  if (this->pid == process.pid)
+  {
+    return true;
+  }
+
+  return false;
 }
 
 /**

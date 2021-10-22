@@ -58,6 +58,17 @@ std::string LinuxParser::ProcPath(int pid, std::string file)
   return path;
 }
 
+/**
+ * @brief Calculate the path for the file and PID
+ * @param pid
+ * @param file
+ * @return path
+ */
+std::string LinuxParser::ProcPath(int pid)
+{
+  std::string path = LinuxParser::kProcDirectory + std::to_string(pid);
+  return path;
+}
 
 /**
  * @brief Convert the data found by Attribute to the required type <std::string>
@@ -128,7 +139,16 @@ void LinuxParser::ConvertData(std::smatch match, SysMon::CpuUtilization& result)
     result.starttime = stoi(match[22].str());
 }
 
-
+/**
+ * @brief Convert the data found by Attribute to the required type <SysMon::CpuUtilization>
+ * @param match
+ * @param result
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, SysMon::Ram& result)
+{
+    result.rss = stoi(match[1].str());
+}
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { return 0.0; }
 

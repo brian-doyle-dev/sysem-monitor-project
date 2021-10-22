@@ -15,6 +15,7 @@ class Process {
   }
   
   float UpdateCpuUtilization();
+  std::string UpdateRam();
   void UpdateProcess();
 
   static bool Compare(Process process1, Process process2);
@@ -25,7 +26,8 @@ class Process {
   float CpuUtilization();                  // TODO: See src/process.cpp
   std::string Ram();                       // TODO: See src/process.cpp
   long int UpTime();                       // TODO: See src/process.cpp
-  bool operator<(Process const& a) const;  // TODO: See src/process.cpp
+  bool operator<(Process const& process) const;  
+  bool operator==(Process const& process) const;
 
   static bool ascending;
 

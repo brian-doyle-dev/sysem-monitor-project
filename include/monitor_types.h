@@ -40,6 +40,10 @@ struct CpuUtilization {
 
     float total;
 };
+
+struct Ram {
+    int rss;
+};
 }
 
 #endif
