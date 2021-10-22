@@ -22,8 +22,7 @@ float Processor::Utilization() {
  */
 void Processor::UpdateUtilization() {
   SysMon::CpuTime cpuTime;
-  cpuTime = LinuxParser::Attribute<SysMon::CpuTime>(std::string(LinuxParser::UtilizationRegex), 
-                                              LinuxParser::kProcDirectory + LinuxParser::kStatFilename);
+  cpuTime = LinuxParser::Attribute<SysMon::CpuTime>(LinuxParser::UtilizationRegex, LinuxParser::kProcDirectory + LinuxParser::kStatFilename);
 
   SysMon::CpuTime diff = cpuTime - this->cpuTime;
   this->cpuTime = cpuTime;
@@ -43,6 +42,5 @@ void Processor::UpdateUtilization() {
  * @return (void)
  */
 void Processor::Model() {
-  model = LinuxParser::Attribute<std::string>(std::string(LinuxParser::CpuModelRegex), 
-                                              LinuxParser::kProcDirectory + LinuxParser::kCpuinfoFilename);
+  model = LinuxParser::Attribute<std::string>(LinuxParser::CpuModelRegex, LinuxParser::kProcDirectory + LinuxParser::kCpuinfoFilename);
 }

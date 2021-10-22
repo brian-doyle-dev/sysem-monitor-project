@@ -55,17 +55,17 @@ std::string User(int pid);
 long int UpTime(int pid);
 
 //Regular Expressions
-const std::string PidsRegex {"^/proc/([0-9]+)$"};
-const std::string CpuModelRegex {"^model name[\\s]+:\\s(.+)"};
-const std::string UtilizationRegex {"^cpu\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)"};
-const std::string OsRegex {"^PRETTY_NAME=\\\"(.*)\\\""};
-const std::string KernelRegex {"^Linux version ([0-9a-zA-Z\\.-]+)"};
-const std::string MemTotalRegex {"^MemTotal:\\s+([0-9]+)"};
-const std::string MemFreeRegex {"^MemFree:\\s+([0-9]+)"};
-const std::string MemAvailableRegex {"^MemAvailable:\\s+([0-9]+)"};
-const std::string UptimeRegex {"^([0-9]+)"};
-const std::string CommandRegex {"^([a-zA-Z0-9\\-\\s/]+)"};
-const std::string StatRegex("^([0-9]+)\\s(\\([a-zA-Z_\\-0-9]+\\)) ([IRSDZTtWXxKWP]) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9\\-]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9\\-]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)");
+const std::regex PidsRegex {"^/proc/([0-9]+)$"};
+const std::regex CpuModelRegex {"^model name[\\s]+:\\s(.+)"};
+const std::regex UtilizationRegex {"^cpu\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+([0-9]+)"};
+const std::regex OsRegex {"^PRETTY_NAME=\\\"(.*)\\\""};
+const std::regex KernelRegex {"^Linux version ([0-9a-zA-Z\\.-]+)"};
+const std::regex MemTotalRegex {"^MemTotal:\\s+([0-9]+)"};
+const std::regex MemFreeRegex {"^MemFree:\\s+([0-9]+)"};
+const std::regex MemAvailableRegex {"^MemAvailable:\\s+([0-9]+)"};
+const std::regex UptimeRegex {"^([0-9]+)"};
+const std::regex CommandRegex {"^([a-zA-Z0-9\\-\\s/]+)"};
+const std::regex StatRegex("^([0-9]+)\\s(\\([a-zA-Z_\\-0-9]+\\)) ([IRSDZTtWXxKWP]) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9\\-]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9\\-]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)");
 
 
 
@@ -87,7 +87,7 @@ void ConvertData(std::smatch match, SysMon::CpuUtilization& result);
  * @param result The value returned by the search
  * @return The value returned by the search
  */
-template <typename T> T Attribute(const std::string& regexString, std::string path) {
+template <typename T> T Attribute(const std::regex& regex, std::string path) {
   T data;
 
   std::string line;
@@ -95,7 +95,6 @@ template <typename T> T Attribute(const std::string& regexString, std::string pa
   std::string value;
   std::ifstream filestream(path);
   std::smatch match;
-  std::regex regex(regexString);
 
   if (filestream.is_open()) 
   {
