@@ -17,6 +17,8 @@ class Process {
   float UpdateCpuUtilization();
   std::string UpdateRam();
   void UpdateProcess();
+  void Terminated();
+  bool HasTerminated();
 
   static bool Compare(Process process1, Process process2);
 
@@ -41,6 +43,7 @@ class Process {
   std::string ram;
   std::string command;
   long int uptime;
+  bool terminated = false;
 
   SysMon::CpuUtilization processTime = {0, 0, 0, 0, 0, 0, 0.0};
 

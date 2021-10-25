@@ -43,7 +43,8 @@ bool System::ProcessExists(Process& process)
     return true;
   }
 
-  std::remove(processes_.begin(), processes_.end(), process);
+  process.Terminated();
+
   return false;
 }
 
@@ -51,6 +52,7 @@ void System::UpdateProcesses()
 {
   std::vector<int> pids = LinuxParser::Pids();
 
+  // Find new processes
   for(auto pid : pids)
   {
     if (processes_.size() == 0)
@@ -75,17 +77,22 @@ void System::UpdateProcesses()
     }
   }
 
+  // Run the update for each process
   for (auto& process : processes_)
   {
     if(ProcessExists(process))
     {
       process.UpdateProcess();
     }
-
-    //std::cout << process.Command();
   }
-//  sort(processes_.begin(), processes_.end(), Process::Compare);
+
   sort(processes_.begin(), processes_.end());
+
+  // Remove terminated processes
+  while((*processes_.begin()).HasTerminated())
+  {
+    processes_.erase(processes_.begin());
+  }
 }
 
 // TODO: Return a container composed of the system's processes

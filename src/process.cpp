@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <cassert>
 
 #include "process.h"
 #include "linux_parser.h"
@@ -37,6 +38,9 @@ float Process::UpdateCpuUtilization()
 //  utilization = 100 * ((processTime.utime + processTime.stime) - (this->processTime.utime - this->processTime.stime)) / (cpuTime.Total() - processTime.total);
   float utilization = 100 * (diff) / (total);
 
+  assert(utilization >= 0.0);
+  assert(utilization < 100.0);
+  
   processTime.total = cpuTime.Total();
   this->processTime = processTime;
 
@@ -74,6 +78,16 @@ void Process::UpdateProcess() {
   ram = UpdateRam();
 }
 
+void Process::Terminated()
+{
+  terminated = true;
+}
+
+bool Process::HasTerminated()
+{
+  return terminated;
+}
+
 /**
  * @brief Return process id 
  * @return The process id
@@ -96,7 +110,7 @@ float Process::CpuUtilization() {
  * @return The command used to start the process
  */
 string Process::Command() { 
-  return command; 
+  return command + "                                                                           "; 
 }
 
 /**
@@ -104,7 +118,7 @@ string Process::Command() {
  * @return This process's memory utilization
  */
 string Process::Ram() { 
-  return ram; 
+  return ram + "      "; 
 }
 
 // TODO: Return the user (name) that generated this process
@@ -130,7 +144,7 @@ long int Process::UpTime() {
 bool Process::operator<(Process const& process) const {
   bool result;
 
-  if (this->pid <= process.pid)
+  if ((this->terminated) || (this->pid <= process.pid))
   {
     result = true;
   }
