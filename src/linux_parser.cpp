@@ -136,7 +136,15 @@ void LinuxParser::ConvertData(std::smatch match, SysMon::CpuUtilization& result)
     result.stime = stoi(match[15].str());
     result.cutime = stoi(match[16].str());
     result.cstime = stoi(match[17].str());
-    result.starttime = stoi(match[22].str());
+    result.starttime = stol(match[22].str());
+    if (match[3].str() == "R")
+    {
+      result.running = true;
+    }
+    else
+    {
+      result.running = false;
+    }
 }
 
 /**

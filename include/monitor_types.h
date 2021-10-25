@@ -37,6 +37,7 @@ struct CpuUtilization {
     int cstime;
     int starttime;
     int utilization;
+    bool running;
 
     float total;
 };

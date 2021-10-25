@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+#include <ctime>
 
 #include "process.h"
 #include "linux_parser.h"
@@ -14,7 +15,7 @@ using std::to_string;
 using std::vector;
 
 bool Process::ascending = false;
-
+int Process::running;
 
 /**
  * @brief Get the CPU utilization for the process
@@ -35,14 +36,18 @@ float Process::UpdateCpuUtilization()
 
   float total = (cpuTime.Total() - processTime.total);
   float diff = ((processTime.utime + processTime.stime) - (this->processTime.utime - this->processTime.stime));
-//  utilization = 100 * ((processTime.utime + processTime.stime) - (this->processTime.utime - this->processTime.stime)) / (cpuTime.Total() - processTime.total);
   float utilization = 100 * (diff) / (total);
 
   assert(utilization >= 0.0);
   assert(utilization < 100.0);
-  
+
   processTime.total = cpuTime.Total();
   this->processTime = processTime;
+
+  if (processTime.running)
+  {
+    running++;
+  }
 
   return utilization;
 }
@@ -70,11 +75,12 @@ std::string Process::UpdateRam()
  * 
  * @return (void)
  */
-void Process::UpdateProcess() {
+void Process::UpdateProcess(int systemUptime) {
 
   std::string path = LinuxParser::ProcPath(pid, LinuxParser::kCmdlineFilename);
   command = LinuxParser::Attribute<std::string>(LinuxParser::CommandRegex, path);
   utilization = UpdateCpuUtilization();
+  uptime = UpdateUpTime(systemUptime);
   ram = UpdateRam();
 }
 
@@ -86,6 +92,16 @@ void Process::Terminated()
 bool Process::HasTerminated()
 {
   return terminated;
+}
+
+void Process::ClearRunning()
+{
+  running = 0;
+}
+
+int Process::Running()
+{
+  return running;
 }
 
 /**
@@ -126,9 +142,22 @@ string Process::User() {
   return string(); 
 }
 
+long int Process::UpdateUpTime(int uptime) { 
+
+  if ((processTime.starttime == 0) || (uptime == 0))
+  {
+    return 0;
+  }
+
+  int starttime = (processTime.starttime / sysconf(_SC_CLK_TCK));
+  int time = uptime - starttime;
+  assert(time < 36000);
+  return time; 
+}
+
 // TODO: Return the age of this process (in seconds)
 long int Process::UpTime() { 
-  return 0; 
+  return uptime;
 }
 
 /**

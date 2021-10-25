@@ -1,5 +1,6 @@
 #include <string>
 #include <chrono>
+#include <cassert>
 
 #include "format.h"
 
@@ -12,20 +13,33 @@ using std::string;
  * @return String in the format 'HH:MM:SS'
  */
 string Format::ElapsedTime(long seconds) { 
-    std::chrono::seconds totalSeconds {seconds};
-    
-    // Find the total number of hours
-    int hrs = std::chrono::duration_cast<std::chrono::hours>(totalSeconds).count();
 
+    assert(seconds < 36000);
+    std::chrono::seconds totalSeconds {seconds};
+    int hrs = 0;
+
+    if (seconds >= 3600)
+    {
+      // Find the total number of hours
+       hrs = std::chrono::duration_cast<std::chrono::hours>(totalSeconds).count();
+    }    
+ 
     // Caluclate the remaining seconds
     seconds -= std::chrono::seconds(std::chrono::hours(hrs)).count();
+
     std::chrono::seconds rem {seconds};
 
-    // Find the number of minutes 
-    int min = std::chrono::duration_cast<std::chrono::minutes>(rem).count();
+    int min = 0;
+    int sec = seconds;
 
-    // Calculate the number of seconds
-    int sec = seconds - std::chrono::seconds(std::chrono::minutes(min)).count();
+    // Find the number of minutes 
+    if (seconds >= 60)
+    {
+        min = std::chrono::duration_cast<std::chrono::minutes>(rem).count();
+       // Calculate the number of seconds
+        sec = seconds - std::chrono::seconds(std::chrono::minutes(min)).count();
+    }
+
 
     // format the string
     char formatOutput[10];

@@ -33,6 +33,7 @@ class System {
   std::vector<Process> processes_ = {};
   float memoryUtilization = 0.0;
   long uptime = 0;
+
 };
 
 #endif

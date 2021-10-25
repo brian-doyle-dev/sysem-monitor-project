@@ -50,6 +50,8 @@ bool System::ProcessExists(Process& process)
 
 void System::UpdateProcesses()
 {
+  Process::ClearRunning();
+
   std::vector<int> pids = LinuxParser::Pids();
 
   // Find new processes
@@ -82,7 +84,7 @@ void System::UpdateProcesses()
   {
     if(ProcessExists(process))
     {
-      process.UpdateProcess();
+      process.UpdateProcess(UpTime());
     }
   }
 
@@ -93,6 +95,7 @@ void System::UpdateProcesses()
   {
     processes_.erase(processes_.begin());
   }
+
 }
 
 // TODO: Return a container composed of the system's processes
@@ -139,8 +142,7 @@ std::string System::OperatingSystem() {
 // TODO: Return the number of processes actively running on the system
 int System::RunningProcesses() {
 
-  return 0;
-
+  return Process::Running();
 }
 
 // TODO: Return the total number of processes on the system

@@ -16,10 +16,12 @@ class Process {
   
   float UpdateCpuUtilization();
   std::string UpdateRam();
-  void UpdateProcess();
+  long int UpdateUpTime(int uptime);
+  void UpdateProcess(int uptime);
   void Terminated();
   bool HasTerminated();
-
+  static void ClearRunning();
+  static int Running();
   static bool Compare(Process process1, Process process2);
 
   int Pid();                               // TODO: See src/process.cpp
@@ -28,6 +30,7 @@ class Process {
   float CpuUtilization();                  // TODO: See src/process.cpp
   std::string Ram();                       // TODO: See src/process.cpp
   long int UpTime();                       // TODO: See src/process.cpp
+
   bool operator<(Process const& process) const;  
   bool operator==(Process const& process) const;
 
@@ -37,15 +40,16 @@ class Process {
   enum SortColumn {PID, USER, CPU, RAM, TIME, COMMAND};
   SortColumn sortColumn = PID;
 
-  int pid;
-  float utilization;
-  std::string user;
-  std::string ram;
-  std::string command;
-  long int uptime;
+  int pid = 0;
+  float utilization = 0.0;
+  std::string user = "";
+  std::string ram = "";
+  std::string command = "";
+  long int uptime = 0;
   bool terminated = false;
+  static int running;
 
-  SysMon::CpuUtilization processTime = {0, 0, 0, 0, 0, 0, 0.0};
+  SysMon::CpuUtilization processTime = {0, 0, 0, 0, 0, 0, false, 0.0};
 
 };
 
