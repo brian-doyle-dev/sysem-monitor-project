@@ -14,9 +14,16 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-bool Process::ascending = true;
+
+Process::SortColumn Process::column = Process::CPU;
+Process::SortOrder Process::order = Process::DESCENDING;
+std::map<int, std::string> Process::users;
+
 int Process::running;
 std::ofstream Process::myfile("log.txt", std::ios::out | std::ios::app);
+
+Process::Process(int pid) : pid(pid) {
+}
 
 /**
  * @brief Get the CPU utilization for the process
@@ -82,10 +89,9 @@ std::string Process::UpdateRam()
  */
 void Process::UpdateProcess(int systemUptime) {
 
-  //std::string path = LinuxParser::ProcPath(pid, LinuxParser::kCmdlineFilename);
-  //command = LinuxParser::Attribute<std::string>(LinuxParser::CommandRegex, path);
   std::string path = LinuxParser::ProcPath(pid, LinuxParser::kStatusFilename);
-  command = LinuxParser::Attribute<std::string>(LinuxParser::StatusRegex, path);
+  command = LinuxParser::Attribute<std::string>(LinuxParser::CommandNameRegex, path);
+  user = LinuxParser::Attribute<int>(LinuxParser::UidRegex, path);
   utilization = UpdateCpuUtilization();
   uptime = UpdateUpTime(systemUptime);
   ram = UpdateRam();
@@ -146,7 +152,7 @@ string Process::Ram() {
 
 // TODO: Return the user (name) that generated this process
 string Process::User() { 
-  return string(); 
+  return users[user] + "               "; 
 }
 
 long int Process::UpdateUpTime(int uptime) { 
@@ -170,24 +176,54 @@ long int Process::UpTime() {
 /**
  * @brief Compare function for sorting processes
  *
- * The result depends on the current setting of 'ascending' and
+ * The result depends on the current setting of 'order' and
  * the result of the actual comparison.
  *
- * @param process1 First process to compare
- * @param process2 Second process to compare
+ * @param process Process to compare
  * @return Boolean result of the compare
  */
 bool Process::operator<(Process const& process) const {
-  bool result;
+  bool result = false;
 
-  if ((this->pid <= process.pid))
+  if ((column == PID) && (this->pid < process.pid))
   {
     result = true;
   }
-
-  if (!ascending)
+  else if ((column == CPU) && (this->utilization < process.utilization))
   {
-    result = ! result;
+    return true;
+  }
+  else if ((column == RAM) && (this->ram < process.ram))
+  {
+    return true;
+  }
+ 
+  return result;
+}
+
+/**
+ * @brief Compare function for sorting processes
+ *
+ * The result depends on the current setting of 'order' and
+ * the result of the actual comparison.
+ *
+ * @param process Process to compare
+ * @return Boolean result of the compare
+ */
+bool Process::operator>(Process const& process) const {
+  bool result = false;
+
+  if ((column == PID) && (this->pid > process.pid))
+  {
+    result = true;
+  } 
+  else if ((column == CPU) && (this->utilization > process.utilization))
+  {
+    return true;
+  }
+  else if ((column == RAM) && (this->ram > process.ram))
+  {
+    return true;
   }
 
   return result;
@@ -198,33 +234,5 @@ bool Process::operator==(Process const& process) const {
   {
     return true;
   }
-
   return false;
-}
-
-/**
- * @brief Compare function for sorting processes
- *
- * The result depends on the current setting of 'ascending' and
- * the result of the actual comparison.
- *
- * @param process1 First process to compare
- * @param process2 Second process to compare
- * @return Boolean result of the compare
- */
-bool Process::Compare(Process process1, Process process2)
-{
-  bool result;
-
-  if (process1.pid <= process2.pid)
-  {
-    result = true;
-  }
-
-  if (!ascending)
-  {
-    result = ! result;
-  }
-
-  return result;
 }

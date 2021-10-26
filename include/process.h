@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <map>
 
 #include "monitor_types.h"
 
@@ -11,14 +12,13 @@ Basic class for Process representation
 It contains relevant attributes as shown below
 */
 class Process {
+
  public:
-  Process(int pid) : pid(pid) {
-      Process::ascending = false;
-  }
 
-  ~Process() {
+  enum SortColumn {PID, USER, CPU, RAM, TIME, COMMAND};
+  enum SortOrder {ASCENDING, DESCENDING};
 
-  }
+  Process(int pid);  
   
   float UpdateCpuUtilization();
   std::string UpdateRam();
@@ -37,19 +37,25 @@ class Process {
   std::string Ram();                       // TODO: See src/process.cpp
   long int UpTime();                       // TODO: See src/process.cpp
 
+  bool operator>(Process const& process) const; 
   bool operator<(Process const& process) const;  
   bool operator==(Process const& process) const;
-
-  static bool ascending;
+  
+  static void SetColumn(SortColumn col) { column = col; }
+  static void SetOrder(SortOrder ord) { order = ord; }
+  static void SetUsers(std::map<int, std::string>& usr) { users = usr; }
+  
+  static SortOrder Order() { return order; }  
+  static SortColumn Column() { return column; } 
 
  private:
-  enum SortColumn {PID, USER, CPU, RAM, TIME, COMMAND};
-  SortColumn sortColumn = PID;
+  static SortColumn column;
+  static SortOrder order;
 
   int pid = 0;
   int cpuTimeTotal = 0;
   float utilization = 0.0;
-  std::string user = "";
+  int user = 0;
   std::string ram = "";
   std::string command = "";
   long int uptime = 0;
@@ -57,7 +63,7 @@ class Process {
   static int running;
 
   SysMon::CpuUtilization processTime = {0, 0, 0, 0, 0, 0, false, 0.0};
-
+  static std::map<int, std::string> users;
   static std::ofstream myfile;
 };
 

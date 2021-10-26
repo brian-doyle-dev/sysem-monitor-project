@@ -19,7 +19,28 @@ using std::vector;
 
 System::System()
 {
+  SysMon::Passwd passwd;
+
+  std::string path = LinuxParser::kPasswordPath;
+  std::ifstream filestream(path);
+  filestream.exceptions(std::ifstream::failbit);
+
+  try
+  {
+    for(;;)
+    {
+      passwd = LinuxParser::Attribute<SysMon::Passwd>(LinuxParser::PasswdRegex, path, filestream);
+      users[passwd.GID] = passwd.user;
+    }
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << e.what() << '\n';
+  }
+
+  Process::SetUsers(users);
   System::UpdateProcesses();
+
 }
 
 /**
@@ -88,14 +109,20 @@ void System::UpdateProcesses()
     }
   }
 
-  sort(processes_.begin(), processes_.end());
+  if (Process::Order() == Process::ASCENDING)
+  {
+    sort(processes_.begin(), processes_.end());
+  }
+  else
+  {
+    sort(processes_.begin(), processes_.end(), std::greater<Process>());
+  }
 
   // Remove terminated processes
   while((*processes_.begin()).HasTerminated())
   {
     processes_.erase(processes_.begin());
   }
-
 }
 
 // TODO: Return a container composed of the system's processes

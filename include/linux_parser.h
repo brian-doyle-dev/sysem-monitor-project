@@ -67,8 +67,9 @@ const std::regex UptimeRegex {"^([0-9]+)"};
 const std::regex CommandRegex {"^([a-zA-Z0-9\\-\\s/]+)"};
 const std::regex StatRegex("^([0-9]+)\\s(\\([a-zA-Z_\\-0-9]+\\)) ([IRSDZTtWXxKWP]) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9\\-]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9\\-]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)");
 const std::regex RamStatRegex("^[0-9]+\\s\\([a-zA-Z_\\-0-9]+\\) [IRSDZTtWXxKWP] [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9\\-]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9\\-]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ ([0-9]+)");
-const std::regex StatusRegex("^Name:\\s+([A-Za-z0-9\\-]+)");
-
+const std::regex CommandNameRegex("^Name:\\s+([A-Za-z0-9\\-]+)");
+const std::regex PasswdRegex("^([A-Za-z0-9\\-]+):x:([0-9]+):([0-9]+)");
+const std::regex UidRegex("^Uid:\\s+([0-9]+)\\s");
 
 // Helper functions
 std::string ProcPath(int pid);
@@ -80,6 +81,7 @@ void ConvertData(std::smatch match, long& result);
 void ConvertData(std::smatch match, SysMon::CpuTime& result);
 void ConvertData(std::smatch match, SysMon::CpuUtilization& result);
 void ConvertData(std::smatch match, SysMon::Ram& result);
+void ConvertData(std::smatch match, SysMon::Passwd& result);
 
 //template <typename T> T Attribute(const std::string& regexString, std::string path);
 /**
@@ -100,6 +102,47 @@ template <typename T> T Attribute(const std::regex& regex, std::string path) {
   std::smatch match;
 
   if (filestream.is_open()) 
+  {
+    while (std::getline(filestream, line)) 
+    {
+      if (std::regex_search(line, match, regex))
+      {
+        ConvertData(match, data);
+        break;
+      }
+    }
+  }
+  else
+  {
+    throw std::runtime_error("File not open: " + path);
+  }
+
+  return data;
+}
+
+//template <typename T> T Attribute(const std::string& regexString, std::string path);
+/**
+ * @brief Get an attribute from the Linux system
+ * 
+ * @param regex Description of the search parameter
+ * @param path The file path for the required attribute
+ * @param result The value returned by the search
+ * @return The value returned by the search
+ */
+template <typename T> T Attribute(const std::regex& regex, std::string path, std::ifstream& filestream) {
+  T data;
+
+  std::string line;
+  std::string key;
+  std::string value;
+  std::smatch match;
+
+  if (!filestream.is_open())
+  {
+    filestream = std::ifstream {path};
+  } 
+
+  if (filestream.is_open())
   {
     while (std::getline(filestream, line)) 
     {

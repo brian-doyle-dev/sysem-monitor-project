@@ -45,6 +45,12 @@ struct CpuUtilization {
 struct Ram {
     int rss;
 };
+
+struct Passwd {
+    std::string user;
+    int UID;
+    int GID;
+};
 }
 
 #endif

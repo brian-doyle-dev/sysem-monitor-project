@@ -157,6 +157,20 @@ void LinuxParser::ConvertData(std::smatch match, SysMon::Ram& result)
 {
     result.rss = stoi(match[1].str());
 }
+
+/**
+ * @brief Convert the data found by Attribute to the required type <SysMon::Passwd>
+ * @param match
+ * @param result
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, SysMon::Passwd& result)
+{
+  result.user = match[1].str();
+  result.UID = stoi(match[2].str());
+  result.GID = stoi(match[3].str());
+}
+
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { return 0.0; }
 
