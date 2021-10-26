@@ -14,7 +14,7 @@ using std::string;
  */
 string Format::ElapsedTime(long seconds) { 
 
-    assert(seconds < 36000);
+//    assert(seconds < 36000);
     std::chrono::seconds totalSeconds {seconds};
     int hrs = 0;
 

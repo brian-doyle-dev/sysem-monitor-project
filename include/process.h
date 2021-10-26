@@ -2,6 +2,8 @@
 #define PROCESS_H
 
 #include <string>
+#include <fstream>
+
 #include "monitor_types.h"
 
 /*
@@ -12,6 +14,10 @@ class Process {
  public:
   Process(int pid) : pid(pid) {
       Process::ascending = false;
+  }
+
+  ~Process() {
+
   }
   
   float UpdateCpuUtilization();
@@ -41,6 +47,7 @@ class Process {
   SortColumn sortColumn = PID;
 
   int pid = 0;
+  int cpuTimeTotal = 0;
   float utilization = 0.0;
   std::string user = "";
   std::string ram = "";
@@ -51,6 +58,7 @@ class Process {
 
   SysMon::CpuUtilization processTime = {0, 0, 0, 0, 0, 0, false, 0.0};
 
+  static std::ofstream myfile;
 };
 
 #endif

@@ -132,10 +132,10 @@ void LinuxParser::ConvertData(std::smatch match, SysMon::CpuTime& result)
  */
 void LinuxParser::ConvertData(std::smatch match, SysMon::CpuUtilization& result)
 {
-    result.utime = stoi(match[14].str());
-    result.stime = stoi(match[15].str());
-    result.cutime = stoi(match[16].str());
-    result.cstime = stoi(match[17].str());
+    result.utime = stol(match[14].str());
+    result.stime = stol(match[15].str());
+    result.cutime = stol(match[16].str());
+    result.cstime = stol(match[17].str());
     result.starttime = stol(match[22].str());
     if (match[3].str() == "R")
     {

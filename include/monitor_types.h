@@ -31,12 +31,12 @@ struct CpuTime {
 };
 
 struct CpuUtilization {
-    int utime;
-    int stime;
-    int cutime;
-    int cstime;
-    int starttime;
-    int utilization;
+    long utime;
+    long stime;
+    long cutime;
+    long cstime;
+    long starttime;
+    long utilization;
     bool running;
 
     float total;

@@ -14,8 +14,9 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-bool Process::ascending = false;
+bool Process::ascending = true;
 int Process::running;
+std::ofstream Process::myfile("log.txt", std::ios::out | std::ios::app);
 
 /**
  * @brief Get the CPU utilization for the process
@@ -34,19 +35,23 @@ float Process::UpdateCpuUtilization()
   path = LinuxParser::ProcPath(pid, LinuxParser::kStatFilename);
   SysMon::CpuUtilization processTime = LinuxParser::Attribute<SysMon::CpuUtilization>(LinuxParser::StatRegex, path);
 
-  float total = (cpuTime.Total() - processTime.total);
-  float diff = ((processTime.utime + processTime.stime) - (this->processTime.utime - this->processTime.stime));
-  float utilization = 100 * (diff) / (total);
+  float total = (cpuTime.Total() - cpuTimeTotal);
+  float diff = ((processTime.utime + processTime.stime) - (this->processTime.utime + this->processTime.stime));
+  float utilization = diff / (total);
 
-  assert(utilization >= 0.0);
-  assert(utilization < 100.0);
-
-  processTime.total = cpuTime.Total();
+  cpuTimeTotal = cpuTime.Total();
   this->processTime = processTime;
 
   if (processTime.running)
   {
     running++;
+  }
+
+  if (pid == 7562)
+  {
+    myfile << std::fixed;
+    myfile << "Pid: " << pid << " : Total: " << total << " : Diff: " << diff << " : Utilization: " << utilization << "\n";
+    myfile.flush();
   }
 
   return utilization;
@@ -77,8 +82,10 @@ std::string Process::UpdateRam()
  */
 void Process::UpdateProcess(int systemUptime) {
 
-  std::string path = LinuxParser::ProcPath(pid, LinuxParser::kCmdlineFilename);
-  command = LinuxParser::Attribute<std::string>(LinuxParser::CommandRegex, path);
+  //std::string path = LinuxParser::ProcPath(pid, LinuxParser::kCmdlineFilename);
+  //command = LinuxParser::Attribute<std::string>(LinuxParser::CommandRegex, path);
+  std::string path = LinuxParser::ProcPath(pid, LinuxParser::kStatusFilename);
+  command = LinuxParser::Attribute<std::string>(LinuxParser::StatusRegex, path);
   utilization = UpdateCpuUtilization();
   uptime = UpdateUpTime(systemUptime);
   ram = UpdateRam();
@@ -151,7 +158,7 @@ long int Process::UpdateUpTime(int uptime) {
 
   int starttime = (processTime.starttime / sysconf(_SC_CLK_TCK));
   int time = uptime - starttime;
-  assert(time < 36000);
+//  assert(time < 36000);
   return time; 
 }
 
@@ -173,7 +180,7 @@ long int Process::UpTime() {
 bool Process::operator<(Process const& process) const {
   bool result;
 
-  if ((this->terminated) || (this->pid <= process.pid))
+  if ((this->pid <= process.pid))
   {
     result = true;
   }
