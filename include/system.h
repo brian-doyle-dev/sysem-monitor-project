@@ -10,6 +10,7 @@
 class System {
  public:
   System();
+
   Processor& Cpu();
 
   void UpdateProcesses();
@@ -28,11 +29,13 @@ class System {
   void RemoveTerminated();
   void Sort();
   void FindNew();
-  
+
   std::string Kernel();               
   std::string OperatingSystem();     
 
   void KeyPressed(int key);
+  void SetDone() { done = true; };
+  bool Done() { return done; };
 
  private:
   Processor cpu_ = {};
@@ -40,6 +43,7 @@ class System {
   float memoryUtilization = 0.0;
   long uptime = 0;
   std::map<int, std::string> users;
+  bool done = false;
 };
 
 #endif

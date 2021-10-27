@@ -21,10 +21,10 @@ float Processor::Utilization() {
  * @return (void)
  */
 void Processor::UpdateUtilization() {
-  SysMon::CpuTime cpuTime;
-  cpuTime = LinuxParser::Attribute<SysMon::CpuTime>(LinuxParser::UtilizationRegex, LinuxParser::kProcDirectory + LinuxParser::kStatFilename);
+  LinuxParser::CpuTime cpuTime;
+  cpuTime = LinuxParser::Attribute<LinuxParser::CpuTime>(LinuxParser::UtilizationRegex, LinuxParser::kProcDirectory + LinuxParser::kStatFilename);
 
-  SysMon::CpuTime diff = cpuTime - this->cpuTime;
+  LinuxParser::CpuTime diff = cpuTime - this->cpuTime;
   this->cpuTime = cpuTime;
 
   try

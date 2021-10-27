@@ -101,7 +101,7 @@ void NCursesDisplay::Display(System& system, int n) {
 
   timeout(1000);
 
-  while (1) {
+  while (!system.Done()) {
     init_pair(1, COLOR_CYAN, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
     box(system_window, 0, 0);
@@ -116,7 +116,6 @@ void NCursesDisplay::Display(System& system, int n) {
     {
       system.KeyPressed(key);
     }
-    // std::this_thread::sleep_for(std::chrono::seconds(1));
   }
   endwin();
 }

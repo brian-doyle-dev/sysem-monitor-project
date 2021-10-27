@@ -1,11 +1,10 @@
 #include <thread>
 
 #include "update.h"
-#include "system.h"
 
 void Update::Start(System& system)
 {
-    while(1)
+    while(!system.Done())
     {
         system.Cpu().UpdateUtilization();
         system.UpdateMemoryUtilization();

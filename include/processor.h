@@ -1,7 +1,7 @@
 #ifndef PROCESSOR_H
 #define PROCESSOR_H
 #include <string>
-#include "monitor_types.h"
+#include "linux_parser.h"
 
 class Processor {
  public:
@@ -12,9 +12,10 @@ class Processor {
   void Model();
 
  private:
-    SysMon::CpuTime cpuTime {0, 0, 0, 0, 0, 0, 0}; 
+    LinuxParser::CpuTime cpuTime {0, 0, 0, 0, 0, 0, 0}; 
     std::string model = "";
     float utilization = 0;
+    static int running;
 };
 
 #endif

@@ -5,7 +5,7 @@
 #include <fstream>
 #include <map>
 
-#include "monitor_types.h"
+#include "linux_parser.h"
 
 /*
 Basic class for Process representation
@@ -18,8 +18,8 @@ class Process {
   enum SortColumn {PID, USER, CPU, RAM, TIME, COMMAND};
   enum SortOrder {ASCENDING, DESCENDING};
 
-  Process(int pid);  
-  
+  Process(int pid) : pid(pid) {}
+
   float UpdateCpuUtilization();
   std::string UpdateRam();
   long int UpdateUpTime(int uptime);
@@ -30,13 +30,12 @@ class Process {
   static int Running();
   static bool Compare(Process process1, Process process2);
 
-  int Pid();                               // TODO: See src/process.cpp
-  std::string User();                      // TODO: See src/process.cpp
-  std::string Command();                   // TODO: See src/process.cpp
-  float CpuUtilization();                  // TODO: See src/process.cpp
-  std::string Ram();                       // TODO: See src/process.cpp
-  long int UpTime();                       // TODO: See src/process.cpp
-
+  int Pid();
+  std::string User();
+  std::string Command();
+  float CpuUtilization();
+  std::string Ram();
+  long int UpTime();
   bool operator>(Process const& process) const; 
   bool operator<(Process const& process) const;  
   bool operator==(Process const& process) const;
@@ -62,9 +61,8 @@ class Process {
   bool terminated = false;
   static int running;
 
-  SysMon::CpuUtilization processTime = {0, 0, 0, 0, 0, 0, false, 0.0};
+  LinuxParser::CpuUtilization processTime = {0, 0, 0, 0, 0, 0, false, 0.0};
   static std::map<int, std::string> users;
-  static std::ofstream myfile;
 };
 
 #endif

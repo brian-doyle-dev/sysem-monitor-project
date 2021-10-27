@@ -20,10 +20,7 @@ Process::SortOrder Process::order = Process::DESCENDING;
 std::map<int, std::string> Process::users;
 
 int Process::running;
-std::ofstream Process::myfile("log.txt", std::ios::out | std::ios::app);
 
-Process::Process(int pid) : pid(pid) {
-}
 
 /**
  * @brief Get the CPU utilization for the process
@@ -37,10 +34,10 @@ Process::Process(int pid) : pid(pid) {
 float Process::UpdateCpuUtilization()
 {
   std::string path = LinuxParser::ProcPath(LinuxParser::kStatFilename);
-  SysMon::CpuTime cpuTime = LinuxParser::Attribute<SysMon::CpuTime>(LinuxParser::UtilizationRegex, path);
+  LinuxParser::CpuTime cpuTime = LinuxParser::Attribute<LinuxParser::CpuTime>(LinuxParser::UtilizationRegex, path);
 
   path = LinuxParser::ProcPath(pid, LinuxParser::kStatFilename);
-  SysMon::CpuUtilization processTime = LinuxParser::Attribute<SysMon::CpuUtilization>(LinuxParser::StatRegex, path);
+  LinuxParser::CpuUtilization processTime = LinuxParser::Attribute<LinuxParser::CpuUtilization>(LinuxParser::StatRegex, path);
 
   float total = (cpuTime.Total() - cpuTimeTotal);
   float diff = ((processTime.utime + processTime.stime) - (this->processTime.utime + this->processTime.stime));
@@ -54,13 +51,6 @@ float Process::UpdateCpuUtilization()
     running++;
   }
 
-  if (pid == 7562)
-  {
-    myfile << std::fixed;
-    myfile << "Pid: " << pid << " : Total: " << total << " : Diff: " << diff << " : Utilization: " << utilization << "\n";
-    myfile.flush();
-  }
-
   return utilization;
 }
 
@@ -70,7 +60,7 @@ std::string Process::UpdateRam()
 
   try {
     std::string path = LinuxParser::ProcPath(pid, LinuxParser::kStatFilename);
-    int ram = LinuxParser::Attribute<SysMon::Ram>(LinuxParser::RamStatRegex, path).rss;
+    int ram = LinuxParser::Attribute<LinuxParser::Ram>(LinuxParser::RamStatRegex, path).rss;
     ramString = std::to_string(ram);
   }
   catch (std::runtime_error& e) {
@@ -174,10 +164,9 @@ long int Process::UpTime() {
 }
 
 /**
- * @brief Compare function for sorting processes
+ * @brief Operator used while sorting processes
  *
- * The result depends on the current setting of 'order' and
- * the result of the actual comparison.
+ * The result depends on the current setting the 'column' member variable
  *
  * @param process Process to compare
  * @return Boolean result of the compare
@@ -206,10 +195,9 @@ bool Process::operator<(Process const& process) const {
 }
 
 /**
- * @brief Compare function for sorting processes
+ * @brief Operator used while sorting processes
  *
- * The result depends on the current setting of 'order' and
- * the result of the actual comparison.
+ * The result depends on the current setting the 'column' member variable
  *
  * @param process Process to compare
  * @return Boolean result of the compare
@@ -237,6 +225,11 @@ bool Process::operator>(Process const& process) const {
   return result;
 }
 
+/**
+ * @brief Equality operator
+ * @param process The process to compare
+ * @return true if the PIDs are equal
+ */
 bool Process::operator==(Process const& process) const {
   if (this->pid == process.pid)
   {

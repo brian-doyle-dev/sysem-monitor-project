@@ -27,7 +27,7 @@ using std::vector;
  */
 System::System()
 {
-  SysMon::Passwd passwd;
+  LinuxParser::Passwd passwd;
 
   std::string path = LinuxParser::kPasswordPath;
   std::ifstream filestream(path);
@@ -37,7 +37,7 @@ System::System()
   {
     for(;;)
     {
-      passwd = LinuxParser::Attribute<SysMon::Passwd>(LinuxParser::PasswdRegex, path, filestream);
+      passwd = LinuxParser::Attribute<LinuxParser::Passwd>(LinuxParser::PasswdRegex, path, filestream);
       users[passwd.GID] = passwd.user;
     }
   }
@@ -179,6 +179,8 @@ void System::UpdateProcesses()
 {
   Process::ClearRunning();
 
+  System::FindNew();
+
   // Run the update for each process
   for (auto& process : processes_)
   {
@@ -289,7 +291,11 @@ long System::UpTime() {
  */
 void System::KeyPressed(int key)
 {
-  if (key == 'p')
+  if (key == 'q')
+  {
+    SetDone();
+  }
+  else if (key == 'p')
   {
     Process::SetColumn(Process::PID);
   }

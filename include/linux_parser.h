@@ -4,7 +4,6 @@
 #include <fstream>
 #include <regex>
 #include <string>
-#include "monitor_types.h"
 
 namespace LinuxParser {
 // Paths
@@ -19,33 +18,6 @@ const std::string kVersionFilename{"/version"};
 const std::string kOSPath{"/etc/os-release"};
 const std::string kPasswordPath{"/etc/passwd"};
 
-// System
-float MemoryUtilization();
-long UpTime();
-std::vector<int> Pids();
-int TotalProcesses();
-int RunningProcesses();
-std::string OperatingSystem();
-std::string Kernel();
-
-// CPU
-enum CPUStates {
-  kUser_ = 0,
-  kNice_,
-  kSystem_,
-  kIdle_,
-  kIOwait_,
-  kIRQ_,
-  kSoftIRQ_,
-  kSteal_,
-  kGuest_,
-  kGuestNice_
-};
-std::vector<std::string> CpuUtilization();
-long Jiffies();
-long ActiveJiffies();
-long ActiveJiffies(int pid);
-long IdleJiffies();
 
 //Regular Expressions
 const std::regex PidsRegex {"^/proc/([0-9]+)$"};
@@ -106,17 +78,65 @@ protected:
   const char *msg;
 };
 
+struct CpuTime {
+    int user;
+    int nice;
+    int system;
+    int idle;
+    int iowait;
+    int irq;
+    int softirq;
+
+    CpuTime operator-(CpuTime cpuTime) {
+        cpuTime.user = user - cpuTime.user;
+        cpuTime.nice = nice - cpuTime.nice;
+        cpuTime.system = system - cpuTime.system;
+        cpuTime.idle = idle - cpuTime.idle;
+        cpuTime.iowait = iowait - cpuTime.iowait;
+        cpuTime.softirq = softirq - cpuTime.softirq;
+
+        return cpuTime;
+    }
+
+    int Total() {
+        return user + nice + system + idle + iowait + irq + softirq;
+    }
+};
+
+struct CpuUtilization {
+    long utime;
+    long stime;
+    long cutime;
+    long cstime;
+    long starttime;
+    long utilization;
+    bool running;
+
+    float total;
+};
+
+struct Ram {
+    int rss;
+};
+
+struct Passwd {
+    std::string user;
+    int UID;
+    int GID;
+};
+
 // Helper functions
+std::vector<int> Pids();
 std::string ProcPath(int pid);
 std::string ProcPath(std::string file);
 std::string ProcPath(int pid, std::string file);
 void ConvertData(std::smatch match, std::string& result);
 void ConvertData(std::smatch match, int& result);
 void ConvertData(std::smatch match, long& result);
-void ConvertData(std::smatch match, SysMon::CpuTime& result);
-void ConvertData(std::smatch match, SysMon::CpuUtilization& result);
-void ConvertData(std::smatch match, SysMon::Ram& result);
-void ConvertData(std::smatch match, SysMon::Passwd& result);
+void ConvertData(std::smatch match, CpuTime& result);
+void ConvertData(std::smatch match, CpuUtilization& result);
+void ConvertData(std::smatch match, Ram& result);
+void ConvertData(std::smatch match, Passwd& result);
 
 
 /**

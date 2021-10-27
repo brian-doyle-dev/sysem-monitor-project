@@ -113,13 +113,13 @@ void LinuxParser::ConvertData(std::smatch match, long& result)
 }
 
 /**
- * @brief Convert the data found by Attribute to the required type <SysMon::CpuTime>
+ * @brief Convert the data found by Attribute to the required type <LinuxParser::CpuTime>
  * 
  * @param match The regex match
  * @param result The converted data
  * @return (void)
  */
-void LinuxParser::ConvertData(std::smatch match, SysMon::CpuTime& result)
+void LinuxParser::ConvertData(std::smatch match, CpuTime& result)
 {
   result.user = stoi(match[1].str());
   result.nice = stoi(match[2].str());
@@ -131,12 +131,12 @@ void LinuxParser::ConvertData(std::smatch match, SysMon::CpuTime& result)
 }
 
 /**
- * @brief Convert the data found by Attribute to the required type <SysMon::CpuUtilization>
+ * @brief Convert the data found by Attribute to the required type <LinuxParser::CpuUtilization>
  * @param The regex match
  * @param result The converted data
  * @return (void)
  */
-void LinuxParser::ConvertData(std::smatch match, SysMon::CpuUtilization& result)
+void LinuxParser::ConvertData(std::smatch match, CpuUtilization& result)
 {
     result.utime = stol(match[14].str());
     result.stime = stol(match[15].str());
@@ -154,23 +154,23 @@ void LinuxParser::ConvertData(std::smatch match, SysMon::CpuUtilization& result)
 }
 
 /**
- * @brief Convert the data found by Attribute to the required type <SysMon::Ram>
+ * @brief Convert the data found by Attribute to the required type <LinuxParser::Ram>
  * @param The regex match
  * @param result The converted data
  * @return (void)
  */
-void LinuxParser::ConvertData(std::smatch match, SysMon::Ram& result)
+void LinuxParser::ConvertData(std::smatch match, Ram& result)
 {
     result.rss = stoi(match[1].str());
 }
 
 /**
- * @brief Convert the data found by Attribute to the required type <SysMon::Passwd>
+ * @brief Convert the data found by Attribute to the required type <LinuxParser::Passwd>
  * @param The regex match
  * @param esult The converted data
  * @return (void)
  */
-void LinuxParser::ConvertData(std::smatch match, SysMon::Passwd& result)
+void LinuxParser::ConvertData(std::smatch match, Passwd& result)
 {
   result.user = match[1].str();
   result.UID = stoi(match[2].str());
