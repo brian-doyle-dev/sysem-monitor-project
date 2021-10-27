@@ -3,6 +3,8 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <cassert>
+#include <iostream>
 
 #include "format.h"
 #include "ncurses_display.h"
@@ -16,16 +18,19 @@ using std::to_string;
 std::string NCursesDisplay::ProgressBar(float percent) {
   std::string result{"0%"};
   int size{50};
-  float bars{percent * size};
+  float bars{percent / 2};
 
+  assert(percent >= 0.0);
+  assert(percent <= 100.0);
+  
   for (int i{0}; i < size; ++i) {
     result += i <= bars ? '|' : ' ';
   }
 
-  string display{to_string(percent * 100).substr(0, 4)};
+  string display{to_string(percent).substr(0, 4)};
   if (percent < 0.1 || percent == 1.0)
     display = " " + to_string(percent * 100).substr(0, 3);
-  return result + " " + display + "/100%";
+  return result + " " + display + "%";
 }
 
 void NCursesDisplay::DisplaySystem(System& system, WINDOW* window) {
@@ -57,10 +62,10 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   int row{0};
   int const pid_column{2};
   int const user_column{9};
-  int const cpu_column{16};
-  int const ram_column{26};
-  int const time_column{35};
-  int const command_column{46};
+  int const cpu_column{26};
+  int const ram_column{36};
+  int const time_column{45};
+  int const command_column{56};
   wattron(window, COLOR_PAIR(2));
   mvwprintw(window, ++row, pid_column, "PID");
   mvwprintw(window, row, user_column, "USER");
@@ -71,7 +76,7 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   wattroff(window, COLOR_PAIR(2));
   int const num_processes = int(processes.size()) > n ? n : processes.size();
   for (int i = 0; i < num_processes; ++i) {
-    mvwprintw(window, ++row, pid_column, to_string(processes[i].Pid()).c_str());
+    mvwprintw(window, ++row, pid_column, (to_string(processes[i].Pid()) + "    ").c_str());
     mvwprintw(window, row, user_column, processes[i].User().c_str());
     float cpu = processes[i].CpuUtilization() * 100;
     mvwprintw(window, row, cpu_column, to_string(cpu).substr(0, 4).c_str());
@@ -79,7 +84,7 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
     mvwprintw(window, row, time_column,
               Format::ElapsedTime(processes[i].UpTime()).c_str());
     mvwprintw(window, row, command_column,
-              processes[i].Command().substr(0, window->_maxx - 46).c_str());
+              processes[i].Command().substr(0, window->_maxx - 56).c_str());
   }
 }
 
@@ -94,8 +99,10 @@ void NCursesDisplay::Display(System& system, int n) {
   WINDOW* process_window =
       newwin(3 + n, x_max - 1, system_window->_maxy + 1, 0);
 
-  while (1) {
-    init_pair(1, COLOR_BLUE, COLOR_BLACK);
+  timeout(1000);
+
+  while (!system.Done()) {
+    init_pair(1, COLOR_CYAN, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
     box(system_window, 0, 0);
     box(process_window, 0, 0);
@@ -104,7 +111,11 @@ void NCursesDisplay::Display(System& system, int n) {
     wrefresh(system_window);
     wrefresh(process_window);
     refresh();
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    int key = getch();
+    if (key != -1)
+    {
+      system.KeyPressed(key);
+    }
   }
   endwin();
 }

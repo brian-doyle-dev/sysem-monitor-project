@@ -1,7 +1,9 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <string>
-#include <vector>
+#include <vector> 
+#include <filesystem>
+
 
 #include "linux_parser.h"
 
@@ -10,106 +12,167 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-// DONE: An example of how to read data from the filesystem
-string LinuxParser::OperatingSystem() {
-  string line;
-  string key;
-  string value;
-  std::ifstream filestream(kOSPath);
-  if (filestream.is_open()) {
-    while (std::getline(filestream, line)) {
-      std::replace(line.begin(), line.end(), ' ', '_');
-      std::replace(line.begin(), line.end(), '=', ' ');
-      std::replace(line.begin(), line.end(), '"', ' ');
-      std::istringstream linestream(line);
-      while (linestream >> key >> value) {
-        if (key == "PRETTY_NAME") {
-          std::replace(value.begin(), value.end(), '_', ' ');
-          return value;
-        }
-      }
-    }
-  }
-  return value;
-}
 
-// DONE: An example of how to read data from the filesystem
-string LinuxParser::Kernel() {
-  string os, version, kernel;
-  string line;
-  std::ifstream stream(kProcDirectory + kVersionFilename);
-  if (stream.is_open()) {
-    std::getline(stream, line);
-    std::istringstream linestream(line);
-    linestream >> os >> version >> kernel;
-  }
-  return kernel;
-}
-
-// BONUS: Update this to use std::filesystem
+/**
+ * @brief Get the PIDs of all the processes running on the system
+ * 
+ * @return A vector containing the list of processes
+ */
 vector<int> LinuxParser::Pids() {
   vector<int> pids;
-  DIR* directory = opendir(kProcDirectory.c_str());
-  struct dirent* file;
-  while ((file = readdir(directory)) != nullptr) {
-    // Is this a directory?
-    if (file->d_type == DT_DIR) {
-      // Is every character of the name a digit?
-      string filename(file->d_name);
-      if (std::all_of(filename.begin(), filename.end(), isdigit)) {
-        int pid = stoi(filename);
-        pids.push_back(pid);
+
+  const std::filesystem::path proc{kProcDirectory};
+  const std::regex rgx(PidsRegex);
+  std::smatch match;
+  
+  for (auto const& dir_entry : std::filesystem::directory_iterator{proc})
+  {
+      std::string dir{dir_entry.path().string()};
+      if (std::regex_search(dir, match, rgx))
+      {
+          pids.push_back(stoi(match[1].str()));
       }
-    }
   }
-  closedir(directory);
+
   return pids;
 }
 
-// TODO: Read and return the system memory utilization
-float LinuxParser::MemoryUtilization() { return 0.0; }
 
-// TODO: Read and return the system uptime
-long LinuxParser::UpTime() { return 0; }
+/**
+ * @brief Calculate the path for the file
+ * 
+ * @param file The file name
+ * @return path The path for the file
+ */
+std::string LinuxParser::ProcPath(std::string file)
+{
+  std::string path = LinuxParser::kProcDirectory + file;
+  return path;
+}
 
-// TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 0; }
 
-// TODO: Read and return the number of active jiffies for a PID
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid[[maybe_unused]]) { return 0; }
+/**
+ * @brief Calculate the path for the file and PID
+ * 
+ * @param pid The PID for the process
+ * @param file The file name
+ * @return path The path for the file
+ */
+std::string LinuxParser::ProcPath(int pid, std::string file)
+{
+  std::string path = LinuxParser::kProcDirectory + std::to_string(pid) + file;
+  return path;
+}
 
-// TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+/**
+ * @brief Calculate the path for the PID
+ * 
+ * @param pid The PID for the process
+ * @return path The path for the PID
+ */
+std::string LinuxParser::ProcPath(int pid)
+{
+  std::string path = LinuxParser::kProcDirectory + std::to_string(pid);
+  return path;
+}
 
-// TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+/**
+ * @brief Convert the data found by Attribute to the required type <std::string>
+ * 
+ * @param match The regex match 
+ * @param result The converted data
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, std::string& result)
+{
+    result = match[1].str();
+}
 
-// TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+/**
+ * @brief Convert the data found by Attribute to the required type <int>
+ * 
+ * @param match The regex match 
+ * @param result The converted data
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, int& result)
+{
+    result = stoi(match[1].str());
+}
 
-// TODO: Read and return the total number of processes
-int LinuxParser::TotalProcesses() { return 0; }
+/**
+ * @brief Convert the data found by Attribute to the required type <long>
+ * 
+ * @param match The regex match 
+ * @param result The converted data
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, long& result)
+{
+    result = stol(match[1].str());
+}
 
-// TODO: Read and return the number of running processes
-int LinuxParser::RunningProcesses() { return 0; }
+/**
+ * @brief Convert the data found by Attribute to the required type <LinuxParser::CpuTime>
+ * 
+ * @param match The regex match
+ * @param result The converted data
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, CpuTime& result)
+{
+  result.user = stoi(match[1].str());
+  result.nice = stoi(match[2].str());
+  result.system = stoi(match[3].str());
+  result.idle = stoi(match[4].str());
+  result.iowait = stoi(match[5].str());
+  result.irq = stoi(match[6].str());
+  result.softirq = stoi(match[7].str());
+}
 
-// TODO: Read and return the command associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid[[maybe_unused]]) { return string(); }
+/**
+ * @brief Convert the data found by Attribute to the required type <LinuxParser::CpuUtilization>
+ * @param The regex match
+ * @param result The converted data
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, CpuUtilization& result)
+{
+    result.utime = stol(match[14].str());
+    result.stime = stol(match[15].str());
+    result.cutime = stol(match[16].str());
+    result.cstime = stol(match[17].str());
+    result.starttime = stol(match[22].str());
+    if (match[3].str() == "R")
+    {
+      result.running = true;
+    }
+    else
+    {
+      result.running = false;
+    }
+}
 
-// TODO: Read and return the memory used by a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Ram(int pid[[maybe_unused]]) { return string(); }
+/**
+ * @brief Convert the data found by Attribute to the required type <LinuxParser::Ram>
+ * @param The regex match
+ * @param result The converted data
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, Ram& result)
+{
+    result.rss = stoi(match[1].str());
+}
 
-// TODO: Read and return the user ID associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Uid(int pid[[maybe_unused]]) { return string(); }
-
-// TODO: Read and return the user associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
-
-// TODO: Read and return the uptime of a process
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid[[maybe_unused]]) { return 0; }
+/**
+ * @brief Convert the data found by Attribute to the required type <LinuxParser::Passwd>
+ * @param The regex match
+ * @param esult The converted data
+ * @return (void)
+ */
+void LinuxParser::ConvertData(std::smatch match, Passwd& result)
+{
+  result.user = match[1].str();
+  result.UID = stoi(match[2].str());
+  result.GID = stoi(match[3].str());
+}
