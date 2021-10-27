@@ -4,6 +4,7 @@
 #include <thread>
 #include <vector>
 #include <cassert>
+#include <iostream>
 
 #include "format.h"
 #include "ncurses_display.h"
@@ -83,7 +84,7 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
     mvwprintw(window, row, time_column,
               Format::ElapsedTime(processes[i].UpTime()).c_str());
     mvwprintw(window, row, command_column,
-              processes[i].Command().substr(0, window->_maxx - 46).c_str());
+              processes[i].Command().substr(0, window->_maxx - 56).c_str());
   }
 }
 
@@ -98,6 +99,8 @@ void NCursesDisplay::Display(System& system, int n) {
   WINDOW* process_window =
       newwin(3 + n, x_max - 1, system_window->_maxy + 1, 0);
 
+  timeout(1000);
+
   while (1) {
     init_pair(1, COLOR_CYAN, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
@@ -108,7 +111,12 @@ void NCursesDisplay::Display(System& system, int n) {
     wrefresh(system_window);
     wrefresh(process_window);
     refresh();
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    int key = getch();
+    if (key != -1)
+    {
+      system.KeyPressed(key);
+    }
+    // std::this_thread::sleep_for(std::chrono::seconds(1));
   }
   endwin();
 }

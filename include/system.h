@@ -28,6 +28,8 @@ class System {
   std::string Kernel();               // TODO: See src/system.cpp
   std::string OperatingSystem();      // TODO: See src/system.cpp
 
+  void KeyPressed(int key);
+
  private:
   Processor cpu_ = {};
   std::vector<Process> processes_ = {};

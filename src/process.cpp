@@ -15,7 +15,7 @@ using std::to_string;
 using std::vector;
 
 
-Process::SortColumn Process::column = Process::CPU;
+Process::SortColumn Process::column = Process::PID;
 Process::SortOrder Process::order = Process::DESCENDING;
 std::map<int, std::string> Process::users;
 
@@ -197,7 +197,11 @@ bool Process::operator<(Process const& process) const {
   {
     return true;
   }
- 
+   else if ((column == USER) && (this->users[this->user] < process.users[process.user]))
+  {
+    return true;
+  }
+
   return result;
 }
 
@@ -222,6 +226,10 @@ bool Process::operator>(Process const& process) const {
     return true;
   }
   else if ((column == RAM) && (this->ram > process.ram))
+  {
+    return true;
+  }
+  else if ((column == USER) && (this->user > process.user))
   {
     return true;
   }

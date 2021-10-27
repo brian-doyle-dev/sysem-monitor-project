@@ -71,7 +71,40 @@ const std::regex CommandNameRegex("^Name:\\s+([A-Za-z0-9\\-]+)");
 const std::regex PasswdRegex("^([A-Za-z0-9\\-]+):x:([0-9]+):([0-9]+)");
 const std::regex UidRegex("^Uid:\\s+([0-9]+)\\s");
 
+class FileNotFound : public std::exception
+{
+public:
+  FileNotFound(std::string msg)  {
+    this->msg = msg.c_str(); 
+  }
+
+  const char* what() const noexcept override {
+    return msg;
+  }
+
+protected:
+
+  const char *msg;
+};
+
+class EndOfFile : public std::exception
+{
+public:
+  EndOfFile(std::string msg)  {
+    this->msg = msg.c_str(); 
+  }
+
+  const char* what() const noexcept override {
+    return msg;
+  }
+
+protected:
+
+  const char *msg;
+};
+
 // Helper functions
+
 std::string ProcPath(int pid);
 std::string ProcPath(std::string file);
 std::string ProcPath(int pid, std::string file);
@@ -92,7 +125,7 @@ void ConvertData(std::smatch match, SysMon::Passwd& result);
  * @param result The value returned by the search
  * @return The value returned by the search
  */
-template <typename T> T Attribute(const std::regex& regex, std::string path) {
+template <typename T> T Attribute(const std::regex& regex, const std::string& path) {
   T data;
 
   std::string line;
@@ -114,7 +147,7 @@ template <typename T> T Attribute(const std::regex& regex, std::string path) {
   }
   else
   {
-    throw std::runtime_error("File not open: " + path);
+    throw FileNotFound(path);
   }
 
   return data;
@@ -129,7 +162,7 @@ template <typename T> T Attribute(const std::regex& regex, std::string path) {
  * @param result The value returned by the search
  * @return The value returned by the search
  */
-template <typename T> T Attribute(const std::regex& regex, std::string path, std::ifstream& filestream) {
+template <typename T> T Attribute(const std::regex& regex, const std::string& path, std::ifstream& filestream) {
   T data;
 
   std::string line;
@@ -144,18 +177,26 @@ template <typename T> T Attribute(const std::regex& regex, std::string path, std
 
   if (filestream.is_open())
   {
-    while (std::getline(filestream, line)) 
+    try
     {
-      if (std::regex_search(line, match, regex))
+      while (std::getline(filestream, line)) 
       {
-        ConvertData(match, data);
-        break;
+        if (std::regex_search(line, match, regex))
+        {
+          ConvertData(match, data);
+          break;
+        }
       }
     }
+    catch(const std::ios_base::failure& e)
+    {
+      throw EndOfFile(path);
+    }
+    
   }
   else
   {
-    throw std::runtime_error("File not open: " + path);
+    throw FileNotFound(path);
   }
 
   return data;

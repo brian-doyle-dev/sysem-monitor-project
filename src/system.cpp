@@ -17,6 +17,14 @@ using std::size_t;
 using std::string;
 using std::vector;
 
+
+/**
+ * @brief Constructor for System
+ * 
+ * Gets a list of the users on the system
+ * Then call System::UpdateProcesses() to initialise the 
+ * processes_ vector;
+ */
 System::System()
 {
   SysMon::Passwd passwd;
@@ -33,14 +41,13 @@ System::System()
       users[passwd.GID] = passwd.user;
     }
   }
-  catch(const std::exception& e)
+  catch(const LinuxParser::EndOfFile& e)
   {
     std::cerr << e.what() << '\n';
   }
 
   Process::SetUsers(users);
   System::UpdateProcesses();
-
 }
 
 /**
@@ -51,12 +58,25 @@ Processor& System::Cpu() {
   return cpu_; 
 }
 
+/**
+ * @brief Add a new process to the processes_ vector
+ * @param pid The PID of the process to add
+ * @return (void)
+ */
 void System::AddNewProcess(int pid)
 {
   Process newProcess {pid};
   processes_.push_back(newProcess);
 }
 
+/**
+ * @brief Check if a process exists
+ * 
+ * If it doesn't exist, mark it as terminated. It will be removed later.
+ * 
+ * @param process The process to check
+ * @return True if the process exists. False otherwise.
+ */
 bool System::ProcessExists(Process& process)
 {
   if(std::filesystem::exists(LinuxParser::ProcPath(process.Pid())))
@@ -69,6 +89,19 @@ bool System::ProcessExists(Process& process)
   return false;
 }
 
+/**
+ * @brief Update the process list
+ * 
+ * The following steps are used to update the processes
+ * 
+ * Get a list of the current PIDs
+ * Find new processes and add them to the processes_ vector
+ * Run through each of the processes and get all the required parameters
+ * Sort the list of processes
+ * Remove the processes that have terminated
+ * 
+ * @return (void)
+ */
 void System::UpdateProcesses()
 {
   Process::ClearRunning();
@@ -104,8 +137,17 @@ void System::UpdateProcesses()
   for (auto& process : processes_)
   {
     if(ProcessExists(process))
-    {
-      process.UpdateProcess(UpTime());
+    { 
+      try
+      {
+        process.UpdateProcess(UpTime());
+      }
+      catch (const LinuxParser::FileNotFound& e)
+      {
+          // Do nothing. 
+          // The process has terminated, so ignore the exception. 
+          // The process will be removed from the list later.
+      }
     }
   }
 
@@ -118,14 +160,24 @@ void System::UpdateProcesses()
     sort(processes_.begin(), processes_.end(), std::greater<Process>());
   }
 
-  // Remove terminated processes
-  while((*processes_.begin()).HasTerminated())
+  
+  for (std::vector<Process>::iterator it = processes_.begin(); it != processes_.end(); ) 
   {
-    processes_.erase(processes_.begin());
+    if ((*it).HasTerminated())
+    {
+      it = processes_.erase(it);
+    }
+    else
+    {
+      it++;
+    }
   }
 }
 
-// TODO: Return a container composed of the system's processes
+/**
+ * @brief Return a container composed of the system's processes
+ * @return A container composed of the system's processes
+ */
 vector<Process>& System::Processes() {
   return processes_;
 }
@@ -166,13 +218,19 @@ std::string System::OperatingSystem() {
 
 }
 
-// TODO: Return the number of processes actively running on the system
+/**
+ * @brief Return the number of processes actively running on the system
+ * @return The number of processes actively running on the system
+ */
 int System::RunningProcesses() {
 
   return Process::Running();
 }
 
-// TODO: Return the total number of processes on the system
+/**
+ * @brief Return the total number of processes on the system
+ * @return The total number of processes on the system
+ */
 int System::TotalProcesses() {
   return processes_.size();
 }
@@ -191,4 +249,40 @@ void System::UpdateUpTime() {
  */
 long System::UpTime() { 
   return uptime;
+}
+
+/**
+ * @brief Process the key that has been pressed
+ * 
+ * Depending on the key press, set the relevant value in the process.
+ * 
+ * @param key The key press value
+ * @return (void)
+ */
+void System::KeyPressed(int key)
+{
+  if (key == 'p')
+  {
+    Process::SetColumn(Process::PID);
+  }
+  else if (key == 'u')
+  {
+    Process::SetColumn(Process::USER);
+  }
+  else if (key == 'r')
+  {
+    Process::SetColumn(Process::RAM);
+  }
+  else if (key == 'c')
+  {
+    Process::SetColumn(Process::CPU);
+  }
+  else if (key == 'a')
+  {
+    Process::SetOrder(Process::ASCENDING);
+  }
+  else if (key == 'd')
+  {
+    Process::SetOrder(Process::DESCENDING);
+  }
 }
