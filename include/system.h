@@ -23,10 +23,14 @@ class System {
   void UpdateUpTime();
   long UpTime();  
 
-  int TotalProcesses();               // TODO: See src/system.cpp
-  int RunningProcesses();             // TODO: See src/system.cpp
-  std::string Kernel();               // TODO: See src/system.cpp
-  std::string OperatingSystem();      // TODO: See src/system.cpp
+  int TotalProcesses();               
+  int RunningProcesses();    
+  void RemoveTerminated();
+  void Sort();
+  void FindNew();
+  
+  std::string Kernel();               
+  std::string OperatingSystem();     
 
   void KeyPressed(int key);
 

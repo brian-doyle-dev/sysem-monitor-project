@@ -90,25 +90,13 @@ bool System::ProcessExists(Process& process)
 }
 
 /**
- * @brief Update the process list
- * 
- * The following steps are used to update the processes
- * 
- * Get a list of the current PIDs
- * Find new processes and add them to the processes_ vector
- * Run through each of the processes and get all the required parameters
- * Sort the list of processes
- * Remove the processes that have terminated
- * 
+ * @brief Find new processes and add them to the provesses_ vector
  * @return (void)
  */
-void System::UpdateProcesses()
+void System::FindNew()
 {
-  Process::ClearRunning();
-
   std::vector<int> pids = LinuxParser::Pids();
 
-  // Find new processes
   for(auto pid : pids)
   {
     if (processes_.size() == 0)
@@ -132,6 +120,64 @@ void System::UpdateProcesses()
       }
     }
   }
+}
+
+/**
+ * @brief Sort the processes
+ * 
+ * Sorts the processes in ascending or descending order.
+ * 
+ * @return (void)
+ */
+void System::Sort()
+{
+  // Sort the processes
+  if (Process::Order() == Process::ASCENDING)
+  {
+    sort(processes_.begin(), processes_.end());
+  }
+  else
+  {
+    sort(processes_.begin(), processes_.end(), std::greater<Process>());
+  }
+
+}
+
+/**
+ * @brief Remove terminated processes from the processes_ vector
+ * @return (void)
+ */
+void System::RemoveTerminated()
+{
+  for (std::vector<Process>::iterator it = processes_.begin(); it != processes_.end(); ) 
+  {
+    if ((*it).HasTerminated())
+    {
+      it = processes_.erase(it);
+    }
+    else
+    {
+      it++;
+    }
+  }
+}
+
+/**
+ * @brief Update the process list
+ * 
+ * The following steps are used to update the processes
+ * 
+ * Get a list of the current PIDs
+ * Find new processes and add them to the processes_ vector
+ * Run through each of the processes and get all the required parameters
+ * Sort the list of processes
+ * Remove the processes that have terminated
+ * 
+ * @return (void)
+ */
+void System::UpdateProcesses()
+{
+  Process::ClearRunning();
 
   // Run the update for each process
   for (auto& process : processes_)
@@ -151,27 +197,9 @@ void System::UpdateProcesses()
     }
   }
 
-  if (Process::Order() == Process::ASCENDING)
-  {
-    sort(processes_.begin(), processes_.end());
-  }
-  else
-  {
-    sort(processes_.begin(), processes_.end(), std::greater<Process>());
-  }
+  Sort();
 
-  
-  for (std::vector<Process>::iterator it = processes_.begin(); it != processes_.end(); ) 
-  {
-    if ((*it).HasTerminated())
-    {
-      it = processes_.erase(it);
-    }
-    else
-    {
-      it++;
-    }
-  }
+  RemoveTerminated();
 }
 
 /**
