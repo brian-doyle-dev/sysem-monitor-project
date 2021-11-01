@@ -37,11 +37,11 @@ float Process::UpdateCpuUtilization()
   LinuxParser::CpuTime cpuTime = LinuxParser::Attribute<LinuxParser::CpuTime>(LinuxParser::UtilizationRegex, path);
 
   path = LinuxParser::ProcPath(pid, LinuxParser::kStatFilename);
-  LinuxParser::CpuUtilization processTime = LinuxParser::Attribute<LinuxParser::CpuUtilization>(LinuxParser::StatRegex, path);
+  const LinuxParser::CpuUtilization processTime = LinuxParser::Attribute<LinuxParser::CpuUtilization>(LinuxParser::StatRegex, path);
 
-  float total = (cpuTime.Total() - cpuTimeTotal);
-  float diff = ((processTime.utime + processTime.stime) - (this->processTime.utime + this->processTime.stime));
-  float utilization = diff / (total);
+  const float total = (cpuTime.Total() - cpuTimeTotal);
+  const float diff = ((processTime.utime + processTime.stime) - (this->processTime.utime + this->processTime.stime));
+  const float utilization = diff / (total);
 
   cpuTimeTotal = cpuTime.Total();
   this->processTime = processTime;
@@ -59,8 +59,8 @@ std::string Process::UpdateRam()
   std::string ramString;
 
   try {
-    std::string path = LinuxParser::ProcPath(pid, LinuxParser::kStatFilename);
-    int ram = LinuxParser::Attribute<LinuxParser::Ram>(LinuxParser::RamStatRegex, path).rss;
+    const std::string path = LinuxParser::ProcPath(pid, LinuxParser::kStatFilename);
+    const int ram = LinuxParser::Attribute<LinuxParser::Ram>(LinuxParser::RamStatRegex, path).rss;
     ramString = std::to_string(ram);
   }
   catch (std::runtime_error& e) {
@@ -79,7 +79,7 @@ std::string Process::UpdateRam()
  */
 void Process::UpdateProcess(int systemUptime) {
 
-  std::string path = LinuxParser::ProcPath(pid, LinuxParser::kStatusFilename);
+  const std::string path = LinuxParser::ProcPath(pid, LinuxParser::kStatusFilename);
   command = LinuxParser::Attribute<std::string>(LinuxParser::CommandNameRegex, path);
   user = LinuxParser::Attribute<int>(LinuxParser::UidRegex, path);
   utilization = UpdateCpuUtilization();
@@ -140,11 +140,19 @@ string Process::Ram() {
   return ram + "      "; 
 }
 
-// TODO: Return the user (name) that generated this process
+/**
+ * @brief Return the user name for the process
+ * @return The user name for the process
+ */
 string Process::User() { 
   return users[user] + "               "; 
 }
 
+/**
+ * @brief Update the process up-time
+ * @param uptime The current system up-time
+ * @return The current process up-time
+ */
 long int Process::UpdateUpTime(int uptime) { 
 
   if ((processTime.starttime == 0) || (uptime == 0))
@@ -152,13 +160,16 @@ long int Process::UpdateUpTime(int uptime) {
     return 0;
   }
 
-  int starttime = (processTime.starttime / sysconf(_SC_CLK_TCK));
-  int time = uptime - starttime;
-//  assert(time < 36000);
+  const int starttime = (processTime.starttime / sysconf(_SC_CLK_TCK));
+  const int time = uptime - starttime;
+
   return time; 
 }
 
-// TODO: Return the age of this process (in seconds)
+/**
+ * @brief Return the age of this process (in seconds)
+ * @return The age of this process (in seconds)
+ */
 long int Process::UpTime() { 
   return uptime;
 }
@@ -231,9 +242,5 @@ bool Process::operator>(Process const& process) const {
  * @return true if the PIDs are equal
  */
 bool Process::operator==(Process const& process) const {
-  if (this->pid == process.pid)
-  {
-    return true;
-  }
-  return false;
+  return (this->pid == process.pid);
 }

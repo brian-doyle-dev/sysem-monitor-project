@@ -11,6 +11,7 @@ class System {
  public:
   System();
 
+  static void Start(System& system);
   Processor& Cpu();
 
   void UpdateProcesses();
