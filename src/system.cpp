@@ -50,6 +50,20 @@ System::System()
   System::UpdateProcesses();
 }
 
+
+void System::Start(System& system)
+{
+    while(!system.Done())
+    {
+        system.Cpu().UpdateUtilization();
+        system.UpdateMemoryUtilization();
+        system.UpdateUpTime();
+        system.UpdateProcesses();
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
 /**
  * @brief Return the CPU info
  * @return The CPU info
@@ -225,10 +239,10 @@ std::string System::Kernel() {
  * @return (void)
  */
 void System::UpdateMemoryUtilization() { 
-  int total = LinuxParser::Attribute<int>(LinuxParser::MemTotalRegex, LinuxParser::kProcDirectory + LinuxParser::kMeminfoFilename);
-  int free = LinuxParser::Attribute<int>(LinuxParser::MemFreeRegex, LinuxParser::kProcDirectory + LinuxParser::kMeminfoFilename);
+  const int total = LinuxParser::Attribute<int>(LinuxParser::MemTotalRegex, LinuxParser::kProcDirectory + LinuxParser::kMeminfoFilename);
+  const int free = LinuxParser::Attribute<int>(LinuxParser::MemFreeRegex, LinuxParser::kProcDirectory + LinuxParser::kMeminfoFilename);
   
-  memoryUtilization = (float(total - free) / float(total)) * 100.0;
+  memoryUtilization = (static_cast<float>(total - free) / static_cast<float>(total)) * 100.0;
 }
 
 /**
@@ -291,32 +305,39 @@ long System::UpTime() {
  */
 void System::KeyPressed(int key)
 {
-  if (key == 'q')
+
+  switch (key)
   {
-    SetDone();
-  }
-  else if (key == 'p')
-  {
-    Process::SetColumn(Process::PID);
-  }
-  else if (key == 'u')
-  {
-    Process::SetColumn(Process::USER);
-  }
-  else if (key == 'r')
-  {
-    Process::SetColumn(Process::RAM);
-  }
-  else if (key == 'c')
-  {
-    Process::SetColumn(Process::CPU);
-  }
-  else if (key == 'a')
-  {
-    Process::SetOrder(Process::ASCENDING);
-  }
-  else if (key == 'd')
-  {
-    Process::SetOrder(Process::DESCENDING);
+    case 'q':
+      SetDone();
+      break;
+
+    case 'p':
+      Process::SetColumn(Process::PID);
+      break;
+
+    case 'u':
+      Process::SetColumn(Process::USER);
+      break;
+
+    case 'r':
+      Process::SetColumn(Process::RAM);
+      break;
+
+    case 'c':
+      Process::SetColumn(Process::CPU);
+      break;
+
+    case 'a':
+      Process::SetOrder(Process::ASCENDING);
+      break;
+
+    case 'd':
+      Process::SetOrder(Process::DESCENDING);
+      break;
+    
+    default:
+      break;
+
   }
 }
